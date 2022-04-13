@@ -4,32 +4,27 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Improwised/coinmetrics-go-sdk/Openapi"
-	"github.com/Improwised/coinmetrics-go-sdk/constants"
+	api "github.com/Improwised/coinmetrics-go-sdk/api/v4"
+	"github.com/Improwised/coinmetrics-go-sdk/coinmetrics"
 )
 
-func Init(endpoint, apikey string) *Openapi.ClientWithResponses {
-
-	client, err := Openapi.NewClientWithResponses(fmt.Sprintf(`%s/%s/`, endpoint, constants.API_VERSION))
-	if err != nil {
-		panic(err)
-	}
-	return client
+func Init(endpoint, apikey string) coinmetrics.CoinMetrics {
+	return coinmetrics.InitClient(endpoint)
 }
 
 func main() {
-	c := Init(`https://community-api.coinmetrics.io/v4/?api_key=sdfsdf`, ``)
-	fre1d := Openapi.CandleFrequency(`1d`)
-	start := Openapi.StartTime(`2021-03-07`)
-	end := Openapi.EndTime(`2022-03-08`)
-	mk := Openapi.GetTimeseriesMarketCandlesParams{
-		Markets:   Openapi.MarketId(`bibox-aaa-usdt-spot`),
-		Frequency: &fre1d,
-		StartTime: &start,
-		EndTime:   &end,
+	c := Init(`https://community-api.coinmetrics.io/v4/`, ``)
+	mk := api.GetTimeseriesMarketImpliedVolatilityParams{
+		Markets: api.MarketId(`bibox-aaa-usdt-spot`),
 	}
-	res, err := c.GetTimeseriesMarketCandlesWithResponse(context.Background(), &mk)
-	fmt.Println(err)
-	fmt.Println(res.JSON200)
-
+	res, err := c.GetTimeseriesMarketImpliedVolatilityWithResponseAsync(context.Background(), &mk)
+	for {
+		select {
+		case rr := <-res:
+			fmt.Println(rr)
+		case errc := <-err:
+			fmt.Println("received", errc)
+			return
+		}
+	}
 }
