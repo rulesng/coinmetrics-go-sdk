@@ -14,7 +14,7 @@ type CoinMetrics struct {
 }
 
 func InitClient(endpoint string) CoinMetrics {
-	client, err := api.NewClientWithResponses(fmt.Sprintf(`%s/%s/`, endpoint, constants.API_VERSION))
+	client, err := api.NewClientWithResponses(fmt.Sprintf(`%s%s/`, endpoint, constants.API_VERSION))
 	if err != nil {
 		return CoinMetrics{}
 	}
@@ -38,8 +38,6 @@ func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseAsync(ctx c
 			res, err := c.GetTimeseriesMarketImpliedVolatilityWithResponse(ctx, params, reqEditors...)
 			if err != nil {
 				marketImpliedVolatilityError <- err
-				close(marketImpliedVolatility)
-				close(marketImpliedVolatilityError)
 				break
 			}
 			if res.JSON200 != nil && len(res.JSON200.Data) > 0 {
@@ -52,10 +50,10 @@ func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseAsync(ctx c
 				continue
 			}
 			marketImpliedVolatilityError <- errors.New(`no data found`)
-			close(marketImpliedVolatility)
-			close(marketImpliedVolatilityError)
 			break
 		}
+		close(marketImpliedVolatility)
+		close(marketImpliedVolatilityError)
 	}()
 
 	return marketImpliedVolatility, marketImpliedVolatilityError

@@ -1,130 +1,115 @@
 package v4_test
 
 import (
-	"bytes"
 	"context"
-	"encoding/gob"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
 	"testing"
 
 	api "github.com/Improwised/coinmetrics-go-sdk/api/v4"
 	"github.com/Improwised/coinmetrics-go-sdk/coinmetrics"
+	"github.com/Improwised/coinmetrics-go-sdk/constants"
 	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestAssetNotFoundForGetCatalogAssetsWithResponseHttpMock(t *testing.T) {
-	t.Parallel()
+var _coinmetrics coinmetrics.CoinMetrics
+
+func TestMain(m *testing.M) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
-	c := coinmetrics.InitClient(`http://fake-endpoint.com/`)
+	_coinmetrics = coinmetrics.InitClient(constants.TEST_ENDPOINT)
+	os.Exit(m.Run())
+}
+
+func TestAssetNotFoundForGetCatalogAssetsWithResponse(t *testing.T) {
+	errResponse := buildErrorMessage(`bad_request`, `Bad parameter 'assets'. Value 'sdvwbtc' is not supported.`)
 	param := api.GetCatalogAssetsParams{
 		Assets: &api.CatalogAssetId{`sdvwbtc`},
 	}
-	errResponse := buildErrorMessage(`bad_request`, `Bad parameter 'assets'. Value 'sdvwbtc' is not supported.`)
-	response := api.GetCatalogAssetsResponse{
-		Body:         byteEncoder(errResponse),
-		HTTPResponse: &http.Response{StatusCode: 400, Status: `400`},
-		JSON200:      nil,
-		JSON400:      &errResponse,
-		JSON401:      nil,
-	}
-	httpmock.RegisterResponder(http.MethodGet, `http://fake-endpoint.com/v4/catalog/assets?assets='sdvwbtc'`,
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets?assets=sdvwbtc`, constants.TEST_ENDPOINT, constants.API_VERSION),
 		func(req *http.Request) (*http.Response, error) {
-			resp, err := httpmock.NewJsonResponse(400, response)
+			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
 			if err != nil {
-				return httpmock.NewStringResponse(500, ""), nil
+				return httpmock.NewStringResponse(http.StatusInternalServerError, `Unable to return mock response`), nil
 			}
 			return resp, nil
 		},
 	)
-	c.GetCatalogAssetsWithResponse(context.Background(), &param)
-
+	actualResponse, err := _coinmetrics.GetCatalogAssetsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Nil(t, actualResponse.JSON200)
+	assert.Equal(t, *actualResponse.JSON400, errResponse)
+	assert.Nil(t, actualResponse.JSON401)
 }
 
-// func TestAssetNotFoundForGetCatalogAssetsWithResponse(t *testing.T) {
-// 	t.Parallel()
-// 	controller := gomock.NewController(t)
-// 	defer controller.Finish()
+func TestGetCatalogAssetsWithoutParams(t *testing.T) {
+	data := getCatalogAssetResponse(`{"data":[{"asset":"100x","full_name":"100xCoin","exchanges":["gate.io"],"markets":["gate.io-100x-usdt-spot"]},{"asset":"10set","full_name":"Tenset","exchanges":["gate.io","lbank"],"markets":["gate.io-10set-usdt-spot","lbank-10set-usdt-spot"]},{"asset":"18c","full_name":"Block 18","exchanges":["huobi"],"markets":["huobi-18c-btc-spot","huobi-18c-eth-spot"]},{"asset":"1art","full_name":"ArtWallet","exchanges":["gate.io"],"markets":["gate.io-1art-usdt-spot"]},{"asset":"1box","full_name":"1BOX","exchanges":["zb.com"],"markets":["zb.com-1box-usdt-spot"]},{"asset":"1earth","full_name":"EarthFund","exchanges":["gate.io","kucoin"],"markets":["gate.io-1earth-usdt-spot","kucoin-1earth-usdt-spot"]}]}`)
+	param := api.GetCatalogAssetsParams{}
 
-// 	client := mock_v4.NewMockClientWithResponsesInterface(controller)
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogAssetsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Equal(t, *actualResponse.JSON200, *data)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Nil(t, actualResponse.JSON401)
+}
 
-// 	errResponse := buildErrorMessage(`bad_request`, `Bad parameter 'assets'. Value 'sdvwbtc' is not supported.`)
-
-// 	param := api.GetCatalogAssetsParams{
-// 		Assets: &api.CatalogAssetId{`sdvwbtc`},
-// 	}
-// 	response := api.GetCatalogAssetsResponse{
-// 		Body:         byteEncoder(errResponse),
-// 		HTTPResponse: &http.Response{StatusCode: 400, Status: `400`},
-// 		JSON200:      nil,
-// 		JSON400:      &errResponse,
-// 		JSON401:      nil,
-// 	}
-// 	client.EXPECT().GetCatalogAssetsWithResponse(context.Background(), &param).Return(&response, nil)
-
-// 	res, err := client.GetCatalogAssetsWithResponse(context.Background(), &param)
-// 	assert.Nil(t, err)
-// 	assert.Equal(t, res.Body, byteEncoder(errResponse))
-// }
-
-// func TestGetCatalogAssetsWithoutParams(t *testing.T) {
-// 	t.Parallel()
-// 	controller := gomock.NewController(t)
-// 	defer controller.Finish()
-
-// 	client := mock_v4.NewMockClientWithResponsesInterface(controller)
-
-// 	param := api.GetCatalogAssetsParams{}
-// 	data := getCatalogAssetResponse(`{"data":[{"asset":"100x","full_name":"100xCoin","exchanges":["gate.io"],"markets":["gate.io-100x-usdt-spot"]},{"asset":"10set","full_name":"Tenset","exchanges":["gate.io","lbank"],"markets":["gate.io-10set-usdt-spot","lbank-10set-usdt-spot"]},{"asset":"18c","full_name":"Block 18","exchanges":["huobi"],"markets":["huobi-18c-btc-spot","huobi-18c-eth-spot"]},{"asset":"1art","full_name":"ArtWallet","exchanges":["gate.io"],"markets":["gate.io-1art-usdt-spot"]},{"asset":"1box","full_name":"1BOX","exchanges":["zb.com"],"markets":["zb.com-1box-usdt-spot"]},{"asset":"1earth","full_name":"EarthFund","exchanges":["gate.io","kucoin"],"markets":["gate.io-1earth-usdt-spot","kucoin-1earth-usdt-spot"]}]}`)
-// 	response := api.GetCatalogAssetsResponse{
-// 		Body:         byteEncoder(data),
-// 		HTTPResponse: &http.Response{StatusCode: 200, Status: `200`},
-// 		JSON200:      data,
-// 		JSON400:      nil,
-// 		JSON401:      nil,
-// 	}
-// 	client.EXPECT().GetCatalogAssetsWithResponse(context.Background(), &param).Return(&response, nil)
-
-// 	res, err := client.GetCatalogAssetsWithResponse(context.Background(), &param)
-// 	assert.Nil(t, err)
-// 	assert.Equal(t, res.Body, byteEncoder(data))
-// }
-
-// func TestGetCatalogAssetsWithParams(t *testing.T) {
-// 	t.Parallel()
-// 	controller := gomock.NewController(t)
-// 	defer controller.Finish()
-
-// 	client := mock_v4.NewMockClientWithResponsesInterface(controller)
-
-// 	param := api.GetCatalogAssetsParams{
-// 		Assets: &api.CatalogAssetId{`100x`},
-// 	}
-// 	data := getCatalogAssetResponse(`{"data":[{"asset":"100x","full_name":"100xCoin","exchanges":["gate.io"],"markets":["gate.io-100x-usdt-spot"]}]}`)
-// 	response := api.GetCatalogAssetsResponse{
-// 		Body:         byteEncoder(data),
-// 		HTTPResponse: &http.Response{StatusCode: 200, Status: `200`},
-// 		JSON200:      data,
-// 		JSON400:      nil,
-// 		JSON401:      nil,
-// 	}
-// 	client.EXPECT().GetCatalogAssetsWithResponse(context.Background(), &param).Return(&response, nil)
-
-// 	res, err := client.GetCatalogAssetsWithResponse(context.Background(), &param)
-// 	assert.Nil(t, err)
-// 	assert.Equal(t, res.Body, byteEncoder(data))
-// }
-
-func byteEncoder(e interface{}) []byte {
-	var network bytes.Buffer
-	enc := gob.NewEncoder(&network)
-	err := enc.Encode(e)
-	if err != nil {
-		return []byte{}
+func TestGetCatalogAssetsWithParams(t *testing.T) {
+	data := getCatalogAssetResponse(`{"data":[{"asset":"100x","full_name":"100xCoin","exchanges":["gate.io"],"markets":["gate.io-100x-usdt-spot"]}]}`)
+	param := api.GetCatalogAssetsParams{
+		Assets:  &api.CatalogAssetId{`100x`},
+		Include: &api.CatalogAssetIncludeFields{`markets`, `exchanges`},
+		Exclude: &api.CatalogAssetExcludeFields{`metrics`},
 	}
 
-	return network.Bytes()
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogAssetsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Equal(t, *actualResponse.JSON200, *data)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestFailAuthenticationForGetCatalogAssetsWithResponse(t *testing.T) {
+	errResponse := buildErrorMessage(`unauthorized`, `Requested resource requires authorization.`)
+	param := api.GetCatalogAssetsParams{
+		Assets: &api.CatalogAssetId{`sdvwbtc`},
+	}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets?assets=sdvwbtc`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
+			if err != nil {
+				return httpmock.NewStringResponse(http.StatusInternalServerError, `Unable to return mock response`), nil
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogAssetsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Nil(t, actualResponse.JSON200)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Equal(t, *actualResponse.JSON401, errResponse)
 }
 
 func buildErrorMessage(message, errorType string) api.ErrorResponse {
