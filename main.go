@@ -18,9 +18,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	mk := api.GetTimeseriesInstitutionMetricsParams{}
-	c.Limit(210)
-	res, errr := c.GetTimeseriesInstitutionMetricsWithResponseAsync(context.Background(), &mk)
+	mk := api.GetTimeseriesMarketGreeksParams{
+		Markets: api.MarketId(`deribit-ETH-25MAR22-1200-P-option`),
+	}
+	c.Limit(110)
+	res, errr := c.GetTimeseriesMarketGreeksWithResponseAsync(context.Background(), &mk)
 	for {
 		select {
 		case rr := <-res:
