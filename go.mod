@@ -5,7 +5,6 @@ go 1.17
 require (
 	github.com/deepmap/oapi-codegen v1.9.1
 	github.com/jarcoal/httpmock v1.1.0
-	github.com/mitchellh/mapstructure v1.4.3
 	github.com/stretchr/testify v1.7.0
 )
 

@@ -18,12 +18,6 @@ type CoinMetrics struct {
 	*api.ClientWithResponses
 }
 
-type InstitutionMetrics struct {
-	Institution string      `json:"institution"`
-	Time        string      `json:"time"`
-	TotalAssets interface{} `json:"gbtc_total_assets"`
-}
-
 // InitClient will accept endpoint and apikey as parameter and it will return CoinMetrics struct which allows to access cliebt object.
 func InitClient(endpoint, apiKey string) (CoinMetrics, error) {
 	// TODO: Detect endpoint and based on that client option like api key should applied
@@ -305,6 +299,9 @@ func (c *CoinMetrics) Limit(l int32) {
 }
 
 func addClientOptions(apiKey string) api.ClientOption {
+	if apiKey == `` {
+		return nil
+	}
 	addApiKey := func(ctx context.Context, req *http.Request) error {
 		q := req.URL.Query()
 		q.Add(constants.PARAMS_API_KEY, apiKey)

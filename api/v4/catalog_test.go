@@ -34,7 +34,7 @@ func TestAssetNotFoundForGetCatalogAssetsWithResponse(t *testing.T) {
 		Assets: &api.CatalogAssetId{`sdvwbtc`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets?api_key=abc`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
 			if err != nil {
@@ -78,7 +78,7 @@ func TestGetCatalogAssetsWithParams(t *testing.T) {
 		Exclude: &api.CatalogAssetExcludeFields{`metrics`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets?api_key=abc&assets=sdvwbtc`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -100,7 +100,7 @@ func TestFailAuthenticationForGetCatalogAssetsWithResponse(t *testing.T) {
 		Assets: &api.CatalogAssetId{`sdvwbtc`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets?assets=sdvwbtc`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
 			if err != nil {
