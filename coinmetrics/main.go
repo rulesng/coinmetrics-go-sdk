@@ -95,58 +95,51 @@ func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseAsync(ctx c
   		- This method will continuously retrive data and send over channel
   		- Check error channel if is there any, when error will occured channel will be closed.
 */
+func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseAsync(ctx context.Context, params *api.GetTimeseriesInstitutionMetricsParams, reqEditors ...api.RequestEditorFn) (chan interface{}, chan error) {
+	institutionMetricsResponse := make(chan interface{})
+	institutionMetricsError := make(chan error)
 
-// TODO: this api return interface because its key values change on the basis on query param.
-// func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseAsync(ctx context.Context, params *api.GetTimeseriesInstitutionMetricsParams, reqEditors ...api.RequestEditorFn) (chan api.InstitutionMetricsResponse, chan error) {
-// 	institutionMetricsResponse := make(chan api.InstitutionMetricsResponse)
-// 	institutionMetricsError := make(chan error)
+	var pageSize int32 = limit
+	go func() {
+		for {
+			// This condition will trigger when limit is set
+			if limit != -1 {
+				if pageSize == 0 {
+					break
+				}
+				if defaultPageSize > pageSize {
+					cc := api.PageSize(pageSize)
+					pageSize = 0
+					params.PageSize = &cc
+				} else {
+					defaultSize := api.PageSize(defaultPageSize)
+					params.PageSize = &defaultSize
+					pageSize = pageSize - int32(defaultSize)
+				}
+			}
+			res, err := c.GetTimeseriesInstitutionMetricsWithResponse(ctx, params, reqEditors...)
+			if err != nil {
+				institutionMetricsError <- err
+				break
+			}
+			if res.JSON200 != nil {
+				params.NextPageToken = res.JSON200.NextPageToken
+				if err != nil {
+					institutionMetricsError <- err
+					break
+				}
+				institutionMetricsResponse <- res.JSON200.Data
+				continue
+			}
+			institutionMetricsError <- errors.New(constants.NO_DATA_FOUND)
+			break
+		}
+		close(institutionMetricsResponse)
+		close(institutionMetricsError)
+	}()
 
-// 	var pageSize int32 = limit
-// 	go func() {
-// 		for {
-// 			// This condition will trigger when limit is set
-// 			if limit != -1 {
-// 				if pageSize == 0 {
-// 					break
-// 				}
-// 				if defaultPageSize > pageSize {
-// 					cc := api.PageSize(pageSize)
-// 					pageSize = 0
-// 					params.PageSize = &cc
-// 				} else {
-// 					defaultSize := api.PageSize(defaultPageSize)
-// 					params.PageSize = &defaultSize
-// 					pageSize = pageSize - int32(defaultSize)
-// 				}
-// 			}
-// 			res, err := c.GetTimeseriesInstitutionMetricsWithResponse(ctx, params, reqEditors...)
-// 			if err != nil {
-// 				institutionMetricsError <- err
-// 				break
-// 			}
-// 			if res.JSON200 != nil {
-// 				params.NextPageToken = res.JSON200.NextPageToken
-// 				var arr []InstitutionMetrics
-// 				err := mapstructure.Decode(res.JSON200.Data, &arr)
-// 				if err != nil {
-// 					institutionMetricsError <- err
-// 					break
-// 				}
-// 				fmt.Println(`=================>>>>>>>>>>>>`, arr)
-// 				// for _, data := range res.JSON200.Data.(map[string]).(string) {
-// 				// 	institutionMetricsResponse <- data
-// 				// }
-// 				continue
-// 			}
-// 			institutionMetricsError <- errors.New(constants.NO_DATA_FOUND)
-// 			break
-// 		}
-// 		close(institutionMetricsResponse)
-// 		close(institutionMetricsError)
-// 	}()
-
-// 	return institutionMetricsResponse, institutionMetricsError
-// }
+	return institutionMetricsResponse, institutionMetricsError
+}
 
 /*
 	GetTimeseriesMarketOpenInteresetWithResponseAsync To get all records over channel for market open interest
@@ -230,6 +223,59 @@ func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseAsync(ctx context.Cont
 				}
 			}
 			res, err := c.GetTimeseriesMarketGreeksWithResponse(ctx, params, reqEditors...)
+			if err != nil {
+				marketGreeksError <- err
+				break
+			}
+			if res.JSON200 != nil && len(res.JSON200.Data) > 0 {
+				params.NextPageToken = res.JSON200.NextPageToken
+				for _, data := range res.JSON200.Data {
+					marketGreeks <- data
+				}
+				if pageSize == 0 {
+					break
+				}
+				continue
+			}
+			marketGreeksError <- errors.New(constants.NO_DATA_FOUND)
+			break
+		}
+		close(marketGreeks)
+		close(marketGreeksError)
+	}()
+
+	return marketGreeks, marketGreeksError
+}
+
+/*
+	GetMempoolFeeratesWithResponseAsync To get market greeks
+ 	ApiEndpoint: https://docs.coinmetrics.io/api/v4#operation/getMempoolFeerates
+	Returning:
+		- Method will be returning two channel, one having data and one with error.
+  		- This method will continuously retrive data and send over channel
+  		- Check error channel if is there any, when error will occured channel will be closed.
+		- You can call Limit() before calling this function to set limit.
+*/
+func (c CoinMetrics) GetMempoolFeeratesWithResponseAsync(ctx context.Context, params *api.GetMempoolFeeratesParams, reqEditors ...api.RequestEditorFn) (chan api.MempoolFeerate, chan error) {
+	marketGreeks := make(chan api.MempoolFeerate)
+	marketGreeksError := make(chan error)
+
+	var pageSize int32 = limit
+	go func() {
+		for {
+			// This condition will trigger when limit is set
+			if pageSize != -1 {
+				if defaultPageSize > pageSize {
+					cc := api.MempoolFeeratesPageSize(pageSize)
+					pageSize = 0
+					params.PageSize = &cc
+				} else {
+					defaultSize := api.MempoolFeeratesPageSize(defaultPageSize)
+					params.PageSize = &defaultSize
+					pageSize = pageSize - int32(defaultSize)
+				}
+			}
+			res, err := c.GetMempoolFeeratesWithResponse(ctx, params, reqEditors...)
 			if err != nil {
 				marketGreeksError <- err
 				break
