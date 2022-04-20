@@ -11,7 +11,8 @@ import (
 )
 
 var limit int32 = -1
-var defaultPageSize int32 = 100
+
+const DEFAULT_PAGE_SIZE int32 = 100
 
 // CoinMetrics struct contains client object
 type CoinMetrics struct {
@@ -49,12 +50,12 @@ func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseAsync(ctx c
 				if pageSize == 0 {
 					break
 				}
-				if defaultPageSize > pageSize {
+				if DEFAULT_PAGE_SIZE > pageSize {
 					cc := api.PageSize(pageSize)
 					pageSize = 0
 					params.PageSize = &cc
 				} else {
-					defaultSize := api.PageSize(defaultPageSize)
+					defaultSize := api.PageSize(DEFAULT_PAGE_SIZE)
 					params.PageSize = &defaultSize
 					pageSize = pageSize - int32(defaultSize)
 				}
@@ -101,12 +102,12 @@ func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseAsync(ctx contex
 				if pageSize == 0 {
 					break
 				}
-				if defaultPageSize > pageSize {
+				if DEFAULT_PAGE_SIZE > pageSize {
 					cc := api.PageSize(pageSize)
 					pageSize = 0
 					params.PageSize = &cc
 				} else {
-					defaultSize := api.PageSize(defaultPageSize)
+					defaultSize := api.PageSize(DEFAULT_PAGE_SIZE)
 					params.PageSize = &defaultSize
 					pageSize = pageSize - int32(defaultSize)
 				}
@@ -156,12 +157,12 @@ func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseAsync(ctx conte
 				if pageSize == 0 {
 					break
 				}
-				if defaultPageSize > pageSize {
+				if DEFAULT_PAGE_SIZE > pageSize {
 					cc := api.PageSize(pageSize)
 					pageSize = 0
 					params.PageSize = &cc
 				} else {
-					defaultSize := api.PageSize(defaultPageSize)
+					defaultSize := api.PageSize(DEFAULT_PAGE_SIZE)
 					params.PageSize = &defaultSize
 					pageSize = pageSize - int32(defaultSize)
 				}
@@ -203,15 +204,17 @@ func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseAsync(ctx context.Cont
 
 	var pageSize int32 = limit
 	go func() {
+		defer close(marketGreeks)
+		defer close(marketGreeksError)
 		for {
 			// This condition will trigger when limit is set
 			if pageSize != -1 {
-				if defaultPageSize > pageSize {
+				if DEFAULT_PAGE_SIZE > pageSize {
 					cc := api.PageSize(pageSize)
 					pageSize = 0
 					params.PageSize = &cc
 				} else {
-					defaultSize := api.PageSize(defaultPageSize)
+					defaultSize := api.PageSize(DEFAULT_PAGE_SIZE)
 					params.PageSize = &defaultSize
 					pageSize = pageSize - int32(defaultSize)
 				}
@@ -229,13 +232,11 @@ func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseAsync(ctx context.Cont
 				if pageSize == 0 {
 					break
 				}
-				continue
+			} else {
+				marketGreeksError <- errors.New(constants.NO_DATA_FOUND)
+				break
 			}
-			marketGreeksError <- errors.New(constants.NO_DATA_FOUND)
-			break
 		}
-		close(marketGreeks)
-		close(marketGreeksError)
 	}()
 
 	return marketGreeks, marketGreeksError
@@ -259,12 +260,12 @@ func (c CoinMetrics) GetMempoolFeeratesWithResponseAsync(ctx context.Context, pa
 		for {
 			// This condition will trigger when limit is set
 			if pageSize != -1 {
-				if defaultPageSize > pageSize {
+				if DEFAULT_PAGE_SIZE > pageSize {
 					cc := api.MempoolFeeratesPageSize(pageSize)
 					pageSize = 0
 					params.PageSize = &cc
 				} else {
-					defaultSize := api.MempoolFeeratesPageSize(defaultPageSize)
+					defaultSize := api.MempoolFeeratesPageSize(DEFAULT_PAGE_SIZE)
 					params.PageSize = &defaultSize
 					pageSize = pageSize - int32(defaultSize)
 				}
