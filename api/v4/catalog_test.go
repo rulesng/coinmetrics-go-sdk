@@ -20,7 +20,11 @@ var _coinmetrics coinmetrics.CoinMetrics
 func TestMain(m *testing.M) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
-	_coinmetrics = coinmetrics.InitClient(constants.TEST_ENDPOINT)
+	var _err error
+	_coinmetrics, _err = coinmetrics.InitClient(constants.TEST_ENDPOINT, constants.TEST_KEY)
+	if _err != nil {
+		panic(_err)
+	}
 	os.Exit(m.Run())
 }
 
@@ -30,7 +34,7 @@ func TestAssetNotFoundForGetCatalogAssetsWithResponse(t *testing.T) {
 		Assets: &api.CatalogAssetId{`sdvwbtc`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets?assets=sdvwbtc`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets?api_key=abc`, constants.TEST_ENDPOINT, constants.API_VERSION),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
 			if err != nil {
@@ -50,7 +54,7 @@ func TestGetCatalogAssetsWithoutParams(t *testing.T) {
 	data := getCatalogAssetResponse(`{"data":[{"asset":"100x","full_name":"100xCoin","exchanges":["gate.io"],"markets":["gate.io-100x-usdt-spot"]},{"asset":"10set","full_name":"Tenset","exchanges":["gate.io","lbank"],"markets":["gate.io-10set-usdt-spot","lbank-10set-usdt-spot"]},{"asset":"18c","full_name":"Block 18","exchanges":["huobi"],"markets":["huobi-18c-btc-spot","huobi-18c-eth-spot"]},{"asset":"1art","full_name":"ArtWallet","exchanges":["gate.io"],"markets":["gate.io-1art-usdt-spot"]},{"asset":"1box","full_name":"1BOX","exchanges":["zb.com"],"markets":["zb.com-1box-usdt-spot"]},{"asset":"1earth","full_name":"EarthFund","exchanges":["gate.io","kucoin"],"markets":["gate.io-1earth-usdt-spot","kucoin-1earth-usdt-spot"]}]}`)
 	param := api.GetCatalogAssetsParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets?api_key=abc`, constants.TEST_ENDPOINT, constants.API_VERSION),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -74,7 +78,7 @@ func TestGetCatalogAssetsWithParams(t *testing.T) {
 		Exclude: &api.CatalogAssetExcludeFields{`metrics`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets?api_key=abc&assets=sdvwbtc`, constants.TEST_ENDPOINT, constants.API_VERSION),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {

@@ -8,22 +8,25 @@ import (
 	"github.com/Improwised/coinmetrics-go-sdk/coinmetrics"
 )
 
-func Init(endpoint, apikey string) coinmetrics.CoinMetrics {
-	return coinmetrics.InitClient(endpoint)
+// Init is used to initialize client object with the given endpoint and apikey
+func Init(endpoint, apikey string) (coinmetrics.CoinMetrics, error) {
+	return coinmetrics.InitClient(endpoint, apikey)
 }
 
 func main() {
-	c := Init(`https://community-api.coinmetrics.io/v4/`, ``)
-	mk := api.GetTimeseriesMarketImpliedVolatilityParams{
-		Markets: api.MarketId(`bibox-aaa-usdt-spot`),
+	c, err := Init(`https://api.coinmetrics.io/`, ``)
+	if err != nil {
+		panic(err)
 	}
-	res, err := c.GetTimeseriesMarketImpliedVolatilityWithResponseAsync(context.Background(), &mk)
+	mk := api.GetTimeseriesInstitutionMetricsParams{}
+	c.Limit(210)
+	res, errr := c.GetTimeseriesInstitutionMetricsWithResponseAsync(context.Background(), &mk)
 	for {
 		select {
 		case rr := <-res:
-			fmt.Println(rr)
-		case errc := <-err:
-			fmt.Println("received", errc)
+			fmt.Println(`---------data-------`, rr)
+		case errc := <-errr:
+			fmt.Println("error", errc)
 			return
 		}
 	}
