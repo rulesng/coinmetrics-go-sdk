@@ -21,8 +21,14 @@ type CoinMetrics struct {
 
 // InitClient will accept endpoint and apikey as parameter and it will return CoinMetrics struct which allows to access cliebt object.
 func InitClient(endpoint, apiKey string) (CoinMetrics, error) {
-	// TODO: Detect endpoint and based on that client option like api key should applied
-	client, err := api.NewClientWithResponses(fmt.Sprintf(`%s%s/`, endpoint, constants.API_VERSION), addClientOptions(apiKey))
+	var client *api.ClientWithResponses
+	var err error
+	clientOptions := addClientOptions(apiKey)
+	if clientOptions == nil {
+		client, err = api.NewClientWithResponses(fmt.Sprintf(`%s%s/`, endpoint, constants.API_VERSION))
+	} else {
+		client, err = api.NewClientWithResponses(fmt.Sprintf(`%s%s/`, endpoint, constants.API_VERSION), clientOptions)
+	}
 	if err != nil {
 		return CoinMetrics{}, err
 	}
