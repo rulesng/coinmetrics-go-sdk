@@ -44,12 +44,11 @@ func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseAsync(ctx c
 
 	var pageSize int32 = limit
 	go func() {
+		defer close(marketImpliedVolatility)
+		defer close(marketImpliedVolatilityError)
 		for {
 			// This condition will trigger when limit is set
 			if pageSize != -1 {
-				if pageSize == 0 {
-					break
-				}
 				if DEFAULT_PAGE_SIZE > pageSize {
 					cc := api.PageSize(pageSize)
 					pageSize = 0
@@ -70,13 +69,14 @@ func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseAsync(ctx c
 				for _, data := range res.JSON200.Data {
 					marketImpliedVolatility <- data
 				}
-				continue
+				if pageSize == 0 {
+					break
+				}
+			} else {
+				marketImpliedVolatilityError <- errors.New(constants.NO_DATA_FOUND)
+				break
 			}
-			marketImpliedVolatilityError <- errors.New(constants.NO_DATA_FOUND)
-			break
 		}
-		close(marketImpliedVolatility)
-		close(marketImpliedVolatilityError)
 	}()
 
 	return marketImpliedVolatility, marketImpliedVolatilityError
@@ -96,12 +96,11 @@ func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseAsync(ctx contex
 
 	var pageSize int32 = limit
 	go func() {
+		defer close(institutionMetricsResponse)
+		defer close(institutionMetricsError)
 		for {
 			// This condition will trigger when limit is set
 			if limit != -1 {
-				if pageSize == 0 {
-					break
-				}
 				if DEFAULT_PAGE_SIZE > pageSize {
 					cc := api.PageSize(pageSize)
 					pageSize = 0
@@ -124,13 +123,14 @@ func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseAsync(ctx contex
 					break
 				}
 				institutionMetricsResponse <- res.JSON200.Data
-				continue
+				if pageSize == 0 {
+					break
+				}
+			} else {
+				institutionMetricsError <- errors.New(constants.NO_DATA_FOUND)
+				break
 			}
-			institutionMetricsError <- errors.New(constants.NO_DATA_FOUND)
-			break
 		}
-		close(institutionMetricsResponse)
-		close(institutionMetricsError)
 	}()
 
 	return institutionMetricsResponse, institutionMetricsError
@@ -151,12 +151,11 @@ func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseAsync(ctx conte
 
 	var pageSize int32 = limit
 	go func() {
+		defer close(marketOpenInterest)
+		defer close(marketOpenInterestError)
 		for {
 			// This condition will trigger when limit is set
 			if pageSize != -1 {
-				if pageSize == 0 {
-					break
-				}
 				if DEFAULT_PAGE_SIZE > pageSize {
 					cc := api.PageSize(pageSize)
 					pageSize = 0
@@ -177,13 +176,14 @@ func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseAsync(ctx conte
 				for _, data := range res.JSON200.Data {
 					marketOpenInterest <- data
 				}
-				continue
+				if pageSize == 0 {
+					break
+				}
+			} else {
+				marketOpenInterestError <- errors.New(constants.NO_DATA_FOUND)
+				break
 			}
-			marketOpenInterestError <- errors.New(constants.NO_DATA_FOUND)
-			break
 		}
-		close(marketOpenInterest)
-		close(marketOpenInterestError)
 	}()
 
 	return marketOpenInterest, marketOpenInterestError
