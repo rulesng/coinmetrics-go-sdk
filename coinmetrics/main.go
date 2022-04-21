@@ -44,7 +44,9 @@ func InitClient(endpoint, apiKey string) (CoinMetrics, error) {
   		- Check error channel if is there any, when error will occured channel will be closed.
 		- You can call Limit() before calling this function to set limit.
 */
-func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseAsync(ctx context.Context, params *api.GetTimeseriesMarketImpliedVolatilityParams, reqEditors ...api.RequestEditorFn) (chan api.MarketImpliedVolatility, chan error) {
+func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseAsync(ctx context.Context, params *api.GetTimeseriesMarketImpliedVolatilityParams, reqEditors ...api.RequestEditorFn) ([]api.MarketImpliedVolatility, error) {
+	var response []api.MarketImpliedVolatility
+	var responseError error
 	marketImpliedVolatility := make(chan api.MarketImpliedVolatility)
 	marketImpliedVolatilityError := make(chan error)
 
@@ -85,7 +87,14 @@ func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseAsync(ctx c
 		}
 	}()
 
-	return marketImpliedVolatility, marketImpliedVolatilityError
+	for {
+		select {
+		case record := <-marketImpliedVolatility:
+			response = append(response, record)
+		case responseError = <-marketImpliedVolatilityError:
+			return response, responseError
+		}
+	}
 }
 
 /*
@@ -96,7 +105,9 @@ func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseAsync(ctx c
   		- This method will continuously retrive data and send over channel
   		- Check error channel if is there any, when error will occured channel will be closed.
 */
-func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseAsync(ctx context.Context, params *api.GetTimeseriesInstitutionMetricsParams, reqEditors ...api.RequestEditorFn) (chan interface{}, chan error) {
+func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseAsync(ctx context.Context, params *api.GetTimeseriesInstitutionMetricsParams, reqEditors ...api.RequestEditorFn) ([]interface{}, error) {
+	var response []interface{}
+	var responseError error
 	institutionMetricsResponse := make(chan interface{})
 	institutionMetricsError := make(chan error)
 
@@ -139,7 +150,14 @@ func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseAsync(ctx contex
 		}
 	}()
 
-	return institutionMetricsResponse, institutionMetricsError
+	for {
+		select {
+		case record := <-institutionMetricsResponse:
+			response = append(response, record)
+		case responseError = <-institutionMetricsError:
+			return response, responseError
+		}
+	}
 }
 
 /*
@@ -151,11 +169,13 @@ func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseAsync(ctx contex
   		- Check error channel if is there any, when error will occured channel will be closed.
 		- You can call Limit() before calling this function to set limit.
 */
-func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseAsync(ctx context.Context, params *api.GetTimeseriesMarketOpenInteresetParams, reqEditors ...api.RequestEditorFn) (chan api.MarketOpenInterest, chan error) {
+func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseAsync(ctx context.Context, params *api.GetTimeseriesMarketOpenInteresetParams, reqEditors ...api.RequestEditorFn) ([]api.MarketOpenInterest, error) {
+	var response []api.MarketOpenInterest
+	var responseError error
 	marketOpenInterest := make(chan api.MarketOpenInterest)
 	marketOpenInterestError := make(chan error)
-
 	var pageSize int32 = limit
+
 	go func() {
 		defer close(marketOpenInterest)
 		defer close(marketOpenInterestError)
@@ -192,7 +212,14 @@ func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseAsync(ctx conte
 		}
 	}()
 
-	return marketOpenInterest, marketOpenInterestError
+	for {
+		select {
+		case record := <-marketOpenInterest:
+			response = append(response, record)
+		case responseError = <-marketOpenInterestError:
+			return response, responseError
+		}
+	}
 }
 
 /*
@@ -204,7 +231,9 @@ func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseAsync(ctx conte
   		- Check error channel if is there any, when error will occured channel will be closed.
 		- You can call Limit() before calling this function to set limit.
 */
-func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseAsync(ctx context.Context, params *api.GetTimeseriesMarketGreeksParams, reqEditors ...api.RequestEditorFn) (chan api.MarketGreeks, chan error) {
+func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseAsync(ctx context.Context, params *api.GetTimeseriesMarketGreeksParams, reqEditors ...api.RequestEditorFn) ([]api.MarketGreeks, error) {
+	var response []api.MarketGreeks
+	var responseError error
 	marketGreeks := make(chan api.MarketGreeks)
 	marketGreeksError := make(chan error)
 
@@ -245,7 +274,14 @@ func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseAsync(ctx context.Cont
 		}
 	}()
 
-	return marketGreeks, marketGreeksError
+	for {
+		select {
+		case record := <-marketGreeks:
+			response = append(response, record)
+		case responseError = <-marketGreeksError:
+			return response, responseError
+		}
+	}
 }
 
 /*
@@ -257,7 +293,9 @@ func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseAsync(ctx context.Cont
   		- Check error channel if is there any, when error will occured channel will be closed.
 		- You can call Limit() before calling this function to set limit.
 */
-func (c CoinMetrics) GetMempoolFeeratesWithResponseAsync(ctx context.Context, params *api.GetMempoolFeeratesParams, reqEditors ...api.RequestEditorFn) (chan api.MempoolFeerate, chan error) {
+func (c CoinMetrics) GetMempoolFeeratesWithResponseAsync(ctx context.Context, params *api.GetMempoolFeeratesParams, reqEditors ...api.RequestEditorFn) ([]api.MempoolFeerate, error) {
+	var response []api.MempoolFeerate
+	var responseError error
 	marketGreeks := make(chan api.MempoolFeerate)
 	marketGreeksError := make(chan error)
 
@@ -298,7 +336,14 @@ func (c CoinMetrics) GetMempoolFeeratesWithResponseAsync(ctx context.Context, pa
 		close(marketGreeksError)
 	}()
 
-	return marketGreeks, marketGreeksError
+	for {
+		select {
+		case record := <-marketGreeks:
+			response = append(response, record)
+		case responseError = <-marketGreeksError:
+			return response, responseError
+		}
+	}
 }
 
 func (c *CoinMetrics) Limit(l int32) {
