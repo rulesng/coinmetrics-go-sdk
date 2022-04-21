@@ -8,11 +8,11 @@ import (
 
 	api "github.com/Improwised/coinmetrics-go-sdk/api/v4"
 	"github.com/Improwised/coinmetrics-go-sdk/constants"
+	"go.uber.org/ratelimit"
 )
 
 var limit int32 = -1
-
-const DEFAULT_PAGE_SIZE int32 = 100
+var rl ratelimit.Limiter
 
 // CoinMetrics struct contains client object
 type CoinMetrics struct {
@@ -24,11 +24,7 @@ func InitClient(endpoint, apiKey string) (CoinMetrics, error) {
 	var client *api.ClientWithResponses
 	var err error
 	clientOptions := addClientOptions(apiKey)
-	if clientOptions == nil {
-		client, err = api.NewClientWithResponses(fmt.Sprintf(`%s%s/`, endpoint, constants.API_VERSION))
-	} else {
-		client, err = api.NewClientWithResponses(fmt.Sprintf(`%s%s/`, endpoint, constants.API_VERSION), clientOptions)
-	}
+	client, err = api.NewClientWithResponses(fmt.Sprintf(`%s%s/`, endpoint, constants.API_VERSION), clientOptions)
 	if err != nil {
 		return CoinMetrics{}, err
 	}
@@ -57,12 +53,12 @@ func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseAsync(ctx c
 		for {
 			// This condition will trigger when limit is set
 			if pageSize != -1 {
-				if DEFAULT_PAGE_SIZE > pageSize {
+				if constants.DEFAULT_PAGE_SIZE > pageSize {
 					cc := api.PageSize(pageSize)
 					pageSize = 0
 					params.PageSize = &cc
 				} else {
-					defaultSize := api.PageSize(DEFAULT_PAGE_SIZE)
+					defaultSize := api.PageSize(constants.DEFAULT_PAGE_SIZE)
 					params.PageSize = &defaultSize
 					pageSize = pageSize - int32(defaultSize)
 				}
@@ -118,12 +114,12 @@ func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseAsync(ctx contex
 		for {
 			// This condition will trigger when limit is set
 			if limit != -1 {
-				if DEFAULT_PAGE_SIZE > pageSize {
+				if constants.DEFAULT_PAGE_SIZE > pageSize {
 					cc := api.PageSize(pageSize)
 					pageSize = 0
 					params.PageSize = &cc
 				} else {
-					defaultSize := api.PageSize(DEFAULT_PAGE_SIZE)
+					defaultSize := api.PageSize(constants.DEFAULT_PAGE_SIZE)
 					params.PageSize = &defaultSize
 					pageSize = pageSize - int32(defaultSize)
 				}
@@ -182,12 +178,12 @@ func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseAsync(ctx conte
 		for {
 			// This condition will trigger when limit is set
 			if pageSize != -1 {
-				if DEFAULT_PAGE_SIZE > pageSize {
+				if constants.DEFAULT_PAGE_SIZE > pageSize {
 					cc := api.PageSize(pageSize)
 					pageSize = 0
 					params.PageSize = &cc
 				} else {
-					defaultSize := api.PageSize(DEFAULT_PAGE_SIZE)
+					defaultSize := api.PageSize(constants.DEFAULT_PAGE_SIZE)
 					params.PageSize = &defaultSize
 					pageSize = pageSize - int32(defaultSize)
 				}
@@ -244,12 +240,12 @@ func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseAsync(ctx context.Cont
 		for {
 			// This condition will trigger when limit is set
 			if pageSize != -1 {
-				if DEFAULT_PAGE_SIZE > pageSize {
+				if constants.DEFAULT_PAGE_SIZE > pageSize {
 					cc := api.PageSize(pageSize)
 					pageSize = 0
 					params.PageSize = &cc
 				} else {
-					defaultSize := api.PageSize(DEFAULT_PAGE_SIZE)
+					defaultSize := api.PageSize(constants.DEFAULT_PAGE_SIZE)
 					params.PageSize = &defaultSize
 					pageSize = pageSize - int32(defaultSize)
 				}
@@ -304,12 +300,12 @@ func (c CoinMetrics) GetMempoolFeeratesWithResponseAsync(ctx context.Context, pa
 		for {
 			// This condition will trigger when limit is set
 			if pageSize != -1 {
-				if DEFAULT_PAGE_SIZE > pageSize {
+				if constants.DEFAULT_PAGE_SIZE > pageSize {
 					cc := api.MempoolFeeratesPageSize(pageSize)
 					pageSize = 0
 					params.PageSize = &cc
 				} else {
-					defaultSize := api.MempoolFeeratesPageSize(DEFAULT_PAGE_SIZE)
+					defaultSize := api.MempoolFeeratesPageSize(constants.DEFAULT_PAGE_SIZE)
 					params.PageSize = &defaultSize
 					pageSize = pageSize - int32(defaultSize)
 				}
@@ -351,8 +347,15 @@ func (c *CoinMetrics) Limit(l int32) {
 }
 
 func addClientOptions(apiKey string) api.ClientOption {
-	if apiKey == `` {
+	var clientOptions api.ClientOption
+	rl = ratelimit.New(100)
+	rateLimit := func(ctx context.Context, req *http.Request) error {
+		rl.Take()
 		return nil
+	}
+	clientOptions = api.WithRequestEditorFn(rateLimit)
+	if apiKey == `` {
+		return clientOptions
 	}
 	addApiKey := func(ctx context.Context, req *http.Request) error {
 		q := req.URL.Query()
@@ -360,5 +363,6 @@ func addClientOptions(apiKey string) api.ClientOption {
 		req.URL.RawQuery = q.Encode()
 		return nil
 	}
-	return api.WithRequestEditorFn(addApiKey)
+	clientOptions = api.WithRequestEditorFn(addApiKey)
+	return clientOptions
 }
