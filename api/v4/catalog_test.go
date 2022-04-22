@@ -116,6 +116,70 @@ func TestFailAuthenticationForGetCatalogAssetsWithResponse(t *testing.T) {
 	assert.Equal(t, *actualResponse.JSON401, errResponse)
 }
 
+func TestAssetNotFoundForGetCatalogMetricsWithResponse(t *testing.T) {
+	errResponse := buildErrorMessage(`bad_request`, `Bad parameter 'metrics'. Value 'asdgwav' is not supported.`)
+	param := api.GetCatalogMetricsParams{
+		Metrics: &api.CatalogMetric{`asdgwav`},
+	}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/metrics`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
+			if err != nil {
+				return httpmock.NewStringResponse(http.StatusInternalServerError, `Unable to return mock response`), nil
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogMetricsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Nil(t, actualResponse.JSON200)
+	assert.Equal(t, *actualResponse.JSON400, errResponse)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestGetCatalogMetricsWithoutParamsResponse(t *testing.T) {
+	data := getCatalogMetricsResponse(`{"data":[{"metric":"AdrActCnt","full_name":"Addresses, active, count","description":"The sum count of unique addresses that were active in the network (either as a recipient or originator of a ledger change) that interval. All parties in a ledger change action (recipients and originators) are counted. Individual addresses are not double-counted if previously active.","category":"Addresses","subcategory":"Active","unit":"Addresses","data_type":"bigint","type":"Sum","frequencies":[{}],"display_name":"Active Addr Cnt"}]}`)
+	param := api.GetCatalogMetricsParams{}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/metrics`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogMetricsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Equal(t, *actualResponse.JSON200, *data)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestGetCatalogMetricsWithParamsResponse(t *testing.T) {
+	data := getCatalogMetricsResponse(`{"data":[{"metric":"AdrActCnt","full_name":"Addresses, active, count","description":"The sum count of unique addresses that were active in the network (either as a recipient or originator of a ledger change) that interval. All parties in a ledger change action (recipients and originators) are counted. Individual addresses are not double-counted if previously active.","category":"Addresses","subcategory":"Active","unit":"Addresses","data_type":"bigint","type":"Sum","frequencies":[{}],"display_name":"Active Addr Cnt"}]}`)
+	param := api.GetCatalogMetricsParams{
+		Metrics: &api.CatalogMetric{`AdrActCnt`},
+	}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/metrics`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogMetricsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Equal(t, *actualResponse.JSON200, *data)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
 func buildErrorMessage(message, errorType string) api.ErrorResponse {
 	errObject := api.ErrorObject{
 		Message: &message,
@@ -123,6 +187,15 @@ func buildErrorMessage(message, errorType string) api.ErrorResponse {
 	}
 	errResponse := api.ErrorResponse{errObject}
 	return errResponse
+}
+
+func getCatalogMetricsResponse(res string) *api.MetricsResponse {
+	responseStruct := api.MetricsResponse{}
+	err := json.Unmarshal([]byte(res), &responseStruct)
+	if err != nil {
+		return &api.MetricsResponse{}
+	}
+	return &responseStruct
 }
 
 func getCatalogAssetResponse(res string) *api.AssetsResponse {
