@@ -202,7 +202,7 @@ func TestFailAuthenticationForGetCatalogMetricsWithResponse(t *testing.T) {
 	assert.Equal(t, *actualResponse.JSON401, errResponse)
 }
 
-// New
+// Catalog Exchange
 
 func TestExchangeNotFoundForGetCatalogExchangesWithResponse(t *testing.T) {
 	errResponse := buildErrorMessage(`bad_request`, `Bad parameter 'id'. Exchange 'sdvwbtc' is not supported.`)
@@ -289,6 +289,92 @@ func TestFailAuthenticationForGetCatalogExchangesWithResponse(t *testing.T) {
 	assert.Equal(t, *actualResponse.JSON401, errResponse)
 }
 
+// Catalog Exchange Asset Pairs
+
+func TestExchangeAssetsNotFoundForGetCatalogExchangeAssetsWithResponse(t *testing.T) {
+	errResponse := buildErrorMessage(`bad_request`, `Bad parameter 'pairs'. Value 'sdvwbtc' is not supported.`)
+	param := api.GetCatalogExchangeAssetsParams{
+		ExchangeAssets: &api.CatalogExchangeAssetId{`sdvwbtc`},
+	}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchange-assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
+			if err != nil {
+				return httpmock.NewStringResponse(http.StatusInternalServerError, `Unable to return mock response`), nil
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogExchangeAssetsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Nil(t, actualResponse.JSON200)
+	assert.Equal(t, *actualResponse.JSON400, errResponse)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestGetCatalogExchangeAssetsWithoutParams(t *testing.T) {
+	data := getCatalogExchangeAssetsResponse(`{"data":[{"exchange_asset":"binance-btc","metrics":[{"metric":"volume_trusted_spot_usd_1d","frequencies":[{"frequency":"1d","min_time":"2020-10-16T00:00:00.000000000Z","max_time":"2021-01-05T00:00:00.000000000Z"}]},{"metric":"volume_trusted_spot_usd_1h","frequencies":[{"frequency":"1h","min_time":"2020-10-15T03:00:00.000000000Z","max_time":"2021-01-06T12:00:00.000000000Z"}]}]},{"exchange_asset":"coinbase-eth","metrics":[{"metric":"volume_trusted_spot_usd_1d","frequencies":[{"frequency":"1d","min_time":"2020-10-11T00:00:00.000000000Z","max_time":"2021-01-05T00:00:00.000000000Z"}]},{"metric":"volume_trusted_spot_usd_1h","frequencies":[{"frequency":"1h","min_time":"2020-10-10T19:00:00.000000000Z","max_time":"2021-01-06T12:00:00.000000000Z"}]}]}]}`)
+	param := api.GetCatalogExchangeAssetsParams{}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchange-assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogExchangeAssetsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Equal(t, *actualResponse.JSON200, *data)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestGetCatalogExchangeAssetsWithParams(t *testing.T) {
+	data := getCatalogExchangeAssetsResponse(`{"data":[{"exchange_asset":"binance-btc","metrics":[{"metric":"volume_trusted_spot_usd_1d","frequencies":[{"frequency":"1d","min_time":"2020-10-16T00:00:00.000000000Z","max_time":"2021-01-05T00:00:00.000000000Z"}]},{"metric":"volume_trusted_spot_usd_1h","frequencies":[{"frequency":"1h","min_time":"2020-10-15T03:00:00.000000000Z","max_time":"2021-01-06T12:00:00.000000000Z"}]}]}]}`)
+	param := api.GetCatalogExchangeAssetsParams{
+		ExchangeAssets: &api.CatalogExchangeAssetId{`binance-btc`},
+	}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchange-assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogExchangeAssetsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Equal(t, *actualResponse.JSON200, *data)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestFailAuthenticationForGetCatalogExchangeAssetsWithResponse(t *testing.T) {
+	errResponse := buildErrorMessage(`unauthorized`, `Requested resource requires authorization.`)
+	param := api.GetCatalogExchangesParams{}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchange-assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
+			if err != nil {
+				return httpmock.NewStringResponse(http.StatusInternalServerError, `Unable to return mock response`), nil
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogExchangesWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Nil(t, actualResponse.JSON200)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Equal(t, *actualResponse.JSON401, errResponse)
+}
+
 func buildErrorMessage(message, errorType string) api.ErrorResponse {
 	errObject := api.ErrorObject{
 		Message: &message,
@@ -321,6 +407,15 @@ func getCatalogExchangeResponse(res string) *api.ExchangesResponse {
 	err := json.Unmarshal([]byte(res), &responseStruct)
 	if err != nil {
 		return &api.ExchangesResponse{}
+	}
+	return &responseStruct
+}
+
+func getCatalogExchangeAssetsResponse(res string) *api.ExchangeAssetsResponse {
+	responseStruct := api.ExchangeAssetsResponse{}
+	err := json.Unmarshal([]byte(res), &responseStruct)
+	if err != nil {
+		return &api.ExchangeAssetsResponse{}
 	}
 	return &responseStruct
 }
