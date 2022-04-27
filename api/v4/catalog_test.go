@@ -571,6 +571,155 @@ func TestIndexesNotFoundForGetCatalogIndexesWithResponse(t *testing.T) {
 	assert.Nil(t, actualResponse.JSON401)
 }
 
+func TestGetCatalogIndexesWithoutParams(t *testing.T) {
+	data := getCatalogIndexesResponse(`{"data":[{"index":"CMBI10","description":"'CMBI10' index.","frequencies":[{"frequency":"15s","min_time":"2020-06-08T20:12:40.000000000Z","max_time":"2020-06-08T20:29:30.000000000Z"}]},{"index":"CMBIBTC","description":"'CMBIBTC' index.","frequencies":[{"frequency":"15s","min_time":"2010-07-18T20:00:00.000000000Z","max_time":"2020-06-08T20:29:45.000000000Z"},{"frequency":"1d","min_time":"2010-07-19T00:00:00.000000000Z","max_time":"2020-06-08T00:00:00.000000000Z"},{"frequency":"1d-ny-close","min_time":"2010-07-18T20:00:00.000000000Z","max_time":"2020-06-08T20:00:00.000000000Z"},{"frequency":"1d-sg-close","min_time":"2010-07-19T08:00:00.000000000Z","max_time":"2020-06-08T08:00:00.000000000Z"},{"frequency":"1h","min_time":"2010-07-18T20:00:00.000000000Z","max_time":"2020-06-08T20:00:00.000000000Z"}]}]}`)
+	param := api.GetCatalogIndexesParams{}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/indexes`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogIndexesWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Equal(t, *actualResponse.JSON200, *data)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestGetCatalogIndexesWithParams(t *testing.T) {
+	data := getCatalogIndexesResponse(`{"data":[{"index":"CMBI10","description":"'CMBI10' index.","frequencies":[{"frequency":"15s","min_time":"2020-06-08T20:12:40.000000000Z","max_time":"2020-06-08T20:29:30.000000000Z"}]}]}`)
+	param := api.GetCatalogIndexesParams{
+		Indexes: &api.CatalogIndexId{`CMBI10`},
+	}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/indexes`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogIndexesWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Equal(t, *actualResponse.JSON200, *data)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestFailAuthenticationForGetCatalogIndexesWithResponse(t *testing.T) {
+	errResponse := buildErrorMessage(`unauthorized`, `Requested resource requires authorization.`)
+	param := api.GetCatalogIndexesParams{}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/indexes`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
+			if err != nil {
+				return httpmock.NewStringResponse(http.StatusInternalServerError, `Unable to return mock response`), nil
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogIndexesWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Nil(t, actualResponse.JSON200)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Equal(t, *actualResponse.JSON401, errResponse)
+}
+
+// Catalog Available assert alerts
+
+func TestAlertNotFoundForGetCatalogAssetAlertRulesWithResponse(t *testing.T) {
+	errResponse := buildErrorMessage(`bad_request`, `Bad parameter 'assets'. Value 'sdvwbtc' is not supported.`)
+	param := api.GetCatalogAssetAlertRulesParams{
+		Assets: &api.CatalogAssetId{`sdvwbtc`},
+	}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/alerts`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
+			if err != nil {
+				return httpmock.NewStringResponse(http.StatusInternalServerError, `Unable to return mock response`), nil
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogAssetAlertRulesWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Nil(t, actualResponse.JSON200)
+	assert.Equal(t, *actualResponse.JSON400, errResponse)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestGetCatalogAssetAlertWithoutParams(t *testing.T) {
+	data := getCatalogAssetAlertRulesResponse(`{"data":[{"asset":"btc","name":"block_count_empty_6b_hi","conditions":[{"description":"The last 4 blocks were empty.","threshold":"4","constituents":["block_count_empty_6b"]}]}]}`)
+	param := api.GetCatalogAssetAlertRulesParams{}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/alerts`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogAssetAlertRulesWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Equal(t, *actualResponse.JSON200, *data)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestGetCatalogAssetAlertWithParams(t *testing.T) {
+	data := getCatalogAssetAlertRulesResponse(`{"data":[{"asset":"btc","name":"block_count_empty_6b_hi","conditions":[{"description":"The last 4 blocks were empty.","threshold":"4","constituents":["block_count_empty_6b"]}]}]}`)
+	param := api.GetCatalogAssetAlertRulesParams{
+		Assets: &api.CatalogAssetId{`btc`},
+		Alerts: &api.CatalogAssetAlertId{`block_count_empty_6b`},
+	}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/alerts`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogAssetAlertRulesWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Equal(t, *actualResponse.JSON200, *data)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestFailAuthenticationForGetCatalogAssetAlertWithResponse(t *testing.T) {
+	errResponse := buildErrorMessage(`unauthorized`, `Requested resource requires authorization.`)
+	param := api.GetCatalogAssetAlertRulesParams{}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/alerts`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
+			if err != nil {
+				return httpmock.NewStringResponse(http.StatusInternalServerError, `Unable to return mock response`), nil
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogAssetAlertRulesWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Nil(t, actualResponse.JSON200)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Equal(t, *actualResponse.JSON401, errResponse)
+}
+
 func buildErrorMessage(message, errorType string) api.ErrorResponse {
 	errObject := api.ErrorObject{
 		Message: &message,
@@ -630,6 +779,24 @@ func getCatalogInstitutionsResponse(res string) *api.InstitutionsResponse {
 	err := json.Unmarshal([]byte(res), &responseStruct)
 	if err != nil {
 		return &api.InstitutionsResponse{}
+	}
+	return &responseStruct
+}
+
+func getCatalogIndexesResponse(res string) *api.IndexesResponse {
+	responseStruct := api.IndexesResponse{}
+	err := json.Unmarshal([]byte(res), &responseStruct)
+	if err != nil {
+		return &api.IndexesResponse{}
+	}
+	return &responseStruct
+}
+
+func getCatalogAssetAlertRulesResponse(res string) *api.AssetAlertRulesResponse {
+	responseStruct := api.AssetAlertRulesResponse{}
+	err := json.Unmarshal([]byte(res), &responseStruct)
+	if err != nil {
+		return &api.AssetAlertRulesResponse{}
 	}
 	return &responseStruct
 }
