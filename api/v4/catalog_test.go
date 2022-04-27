@@ -720,6 +720,29 @@ func TestFailAuthenticationForGetCatalogAssetAlertWithResponse(t *testing.T) {
 	assert.Equal(t, *actualResponse.JSON401, errResponse)
 }
 
+// Catalog Available markets
+
+func TestMetricsNotFoundForGetCatalogMarketsWithResponse(t *testing.T) {
+	errResponse := buildErrorMessage(`bad_request`, `Bad parameter 'markets'. Invalid format for market: 'asdw'.`)
+	param := api.GetCatalogMarketsParams{
+		Markets: &api.CatalogMarketId{`asdw`},
+	}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/markets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
+			if err != nil {
+				return httpmock.NewStringResponse(http.StatusInternalServerError, `Unable to return mock response`), nil
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogMarketsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Nil(t, actualResponse.JSON200)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
 func buildErrorMessage(message, errorType string) api.ErrorResponse {
 	errObject := api.ErrorObject{
 		Message: &message,

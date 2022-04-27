@@ -14041,7 +14041,6 @@ func NewGetTimeseriesMarketCandlesRequest(server string, params *GetTimeseriesMa
 	}
 
 	queryURL.RawQuery = queryValues.Encode()
-	fmt.Println(queryURL.RawQuery)
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -17888,6 +17887,7 @@ type GetCatalogMarketsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *MarketsResponse
+	JSON400      *ErrorResponse
 	JSON401      *ErrorResponse
 }
 
@@ -20576,6 +20576,13 @@ func ParseGetCatalogMarketsResponse(rsp *http.Response) (*GetCatalogMarketsRespo
 		}
 		response.JSON200 = &dest
 
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
 		var dest ErrorResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
@@ -21808,4 +21815,3 @@ func ParseGetTimeseriesPairMetricsResponse(rsp *http.Response) (*GetTimeseriesPa
 
 	return response, nil
 }
-
