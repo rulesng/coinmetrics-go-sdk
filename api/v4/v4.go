@@ -17841,6 +17841,7 @@ type GetCatalogMarketCandlesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *CatalogMarketCandlesResponse
+	JSON400      *ErrorResponse
 	JSON401      *ErrorResponse
 }
 
@@ -20509,6 +20510,13 @@ func ParseGetCatalogMarketCandlesResponse(rsp *http.Response) (*GetCatalogMarket
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
 		var dest ErrorResponse
