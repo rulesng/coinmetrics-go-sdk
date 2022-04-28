@@ -740,7 +740,84 @@ func TestMetricsNotFoundForGetCatalogMarketsWithResponse(t *testing.T) {
 	actualResponse, err := _coinmetrics.GetCatalogMarketsWithResponse(context.Background(), &param)
 	assert.Nil(t, err)
 	assert.Nil(t, actualResponse.JSON200)
+	assert.Equal(t, *actualResponse.JSON400, errResponse)
 	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestGetCatalogMarketsWithoutParams(t *testing.T) {
+	data := getCatalogMarketsResponse(`{"data":[{"market":"bitmex-XBTF15-future","min_time":"2014-11-24T13:05:32.850000000Z","max_time":"2015-01-30T12:00:00.000000000Z","trades":{"min_time":"2014-11-24T13:05:32.850000000Z","max_time":"2015-01-30T12:00:00.000000000Z"},"exchange":"bitmex","type":"future","symbol":"XBTF15","base":"btc","quote":"usd","size_asset":"XBT","margin_asset":"USD","contract_size":"1","tick_size":"0.1","listing":"2014-11-24T13:05:32.850000000Z","expiration":"2015-01-30T12:00:00.000000000Z"},{"market":"bitfinex-agi-btc-spot","min_time":"2018-04-07T16:25:55.000000000Z","max_time":"2020-03-25T20:12:09.639000000Z","trades":{"min_time":"2018-04-07T16:25:55.000000000Z","max_time":"2020-03-25T20:12:09.639000000Z"},"exchange":"bitfinex","type":"spot","base":"agi","quote":"btc"}]}`)
+	param := api.GetCatalogMarketsParams{}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/markets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogMarketsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Equal(t, *actualResponse.JSON200, *data)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestGetCatalogMarketsWithResponse(t *testing.T) {
+	exchange := `bitmex`
+	var marketType api.GetCatalogMarketsParamsType = `future`
+	var base api.MarketBase = `btc`
+	var asset api.MarketAsset = `btc`
+	var symbol api.MarketSymbol = `XBTF15`
+	var limit api.CatalogMarketLimit = `1`
+	data := getCatalogMarketsResponse(`{"data":[{"market":"bitmex-XBTF15-future","min_time":"2014-11-24T13:05:32.850000000Z","max_time":"2015-01-30T12:00:00.000000000Z","trades":{"min_time":"2014-11-24T13:05:32.850000000Z","max_time":"2015-01-30T12:00:00.000000000Z"},"exchange":"bitmex","type":"future","symbol":"XBTF15","base":"btc","quote":"usd","size_asset":"XBT","margin_asset":"USD","contract_size":"1","tick_size":"0.1","listing":"2014-11-24T13:05:32.850000000Z","expiration":"2015-01-30T12:00:00.000000000Z"}]}`)
+	param := api.GetCatalogMarketsParams{
+		Markets:  &api.CatalogMarketId{`bitmex-XBTF15-future`},
+		Exchange: &exchange,
+		Type:     &marketType,
+		Base:     &base,
+		Asset:    &asset,
+		Symbol:   &symbol,
+		Include:  &api.CatalogMarketIncludeFields{`trades`, `orderbooks`, `quotes`, `candles`, `liquidations`},
+		Exclude:  &api.CatalogMarketExcludeFields{`funding_rates`, `openinterest`},
+		Limit:    &limit,
+	}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/markets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogMarketsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Equal(t, *actualResponse.JSON200, *data)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestFailAuthenticationForGetCatalogMarketsWithResponse(t *testing.T) {
+	errResponse := buildErrorMessage(`unauthorized`, `Requested resource requires authorization.`)
+	param := api.GetCatalogMarketsParams{}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/markets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
+			if err != nil {
+				return httpmock.NewStringResponse(http.StatusInternalServerError, `Unable to return mock response`), nil
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogMarketsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Nil(t, actualResponse.JSON200)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Equal(t, *actualResponse.JSON401, errResponse)
 }
 
 func buildErrorMessage(message, errorType string) api.ErrorResponse {
@@ -820,6 +897,15 @@ func getCatalogAssetAlertRulesResponse(res string) *api.AssetAlertRulesResponse 
 	err := json.Unmarshal([]byte(res), &responseStruct)
 	if err != nil {
 		return &api.AssetAlertRulesResponse{}
+	}
+	return &responseStruct
+}
+
+func getCatalogMarketsResponse(res string) *api.MarketsResponse {
+	responseStruct := api.MarketsResponse{}
+	err := json.Unmarshal([]byte(res), &responseStruct)
+	if err != nil {
+		return &api.MarketsResponse{}
 	}
 	return &responseStruct
 }
