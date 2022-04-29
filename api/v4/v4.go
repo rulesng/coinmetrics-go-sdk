@@ -2670,6 +2670,8 @@ type CatalogMarketFormat string
 // CatalogMarketId defines model for CatalogMarketId.
 type CatalogMarketId []string
 
+type MarketQuoteParameter string
+
 // CatalogMarketIncludeFields defines model for CatalogMarketIncludeFields.
 type CatalogMarketIncludeFields []string
 
@@ -3585,7 +3587,7 @@ type GetCatalogAllMarketCandlesParams struct {
 	Base *MarketBase `json:"base,omitempty"`
 
 	// Quote asset of markets.
-	Quote *MarketQuote `json:"quote,omitempty"`
+	Quote *MarketQuoteParameter `json:"quote,omitempty"`
 
 	// Any asset of markets.
 	Asset *MarketAsset `json:"asset,omitempty"`
@@ -3621,7 +3623,7 @@ type GetCatalogAllMarketMetricsParams struct {
 	Base *MarketBase `json:"base,omitempty"`
 
 	// Quote asset of markets.
-	Quote *MarketQuote `json:"quote,omitempty"`
+	Quote *MarketQuoteParameter `json:"quote,omitempty"`
 
 	// Any asset of markets.
 	Asset *MarketAsset `json:"asset,omitempty"`
@@ -3657,7 +3659,7 @@ type GetCatalogAllMarketsParams struct {
 	Base *MarketBase `json:"base,omitempty"`
 
 	// Quote asset of markets.
-	Quote *MarketQuote `json:"quote,omitempty"`
+	Quote *MarketQuoteParameter `json:"quote,omitempty"`
 
 	// Any asset of markets.
 	Asset *MarketAsset `json:"asset,omitempty"`
@@ -3783,7 +3785,7 @@ type GetCatalogMarketCandlesParams struct {
 	Base *MarketBase `json:"base,omitempty"`
 
 	// Quote asset of markets.
-	Quote *MarketQuote `json:"quote,omitempty"`
+	Quote *MarketQuoteParameter `json:"quote,omitempty"`
 
 	// Any asset of markets.
 	Asset *MarketAsset `json:"asset,omitempty"`
@@ -3819,7 +3821,7 @@ type GetCatalogMarketMetricsParams struct {
 	Base *MarketBase `json:"base,omitempty"`
 
 	// Quote asset of markets.
-	Quote *MarketQuote `json:"quote,omitempty"`
+	Quote *MarketQuoteParameter `json:"quote,omitempty"`
 
 	// Any asset of markets.
 	Asset *MarketAsset `json:"asset,omitempty"`
@@ -3855,7 +3857,7 @@ type GetCatalogMarketsParams struct {
 	Base *MarketBase `json:"base,omitempty"`
 
 	// Quote asset of markets.
-	Quote *MarketQuote `json:"quote,omitempty"`
+	Quote *MarketQuoteParameter `json:"quote,omitempty"`
 
 	// Any asset of markets.
 	Asset *MarketAsset `json:"asset,omitempty"`
@@ -13850,7 +13852,6 @@ func NewGetTimeseriesMarketCandlesRequest(server string, params *GetTimeseriesMa
 	}
 
 	queryValues := queryURL.Query()
-	
 
 	if queryFrag, err := runtime.StyleParamWithLocation("form", false, "markets", runtime.ParamLocationQuery, params.Markets); err != nil {
 		return nil, err
@@ -17865,6 +17866,7 @@ type GetCatalogMarketMetricsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *CatalogMarketMetricsResponse
+	JSON400      *ErrorResponse
 	JSON401      *ErrorResponse
 }
 
@@ -20550,6 +20552,13 @@ func ParseGetCatalogMarketMetricsResponse(rsp *http.Response) (*GetCatalogMarket
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
 		var dest ErrorResponse

@@ -772,6 +772,7 @@ func TestGetCatalogMarketsWithResponse(t *testing.T) {
 	var symbol api.MarketSymbol = `XBTF15`
 	var limit api.CatalogMarketLimit = `1`
 	var format api.CatalogMarketFormat = `json`
+	var quote api.MarketQuoteParameter = `usd`
 	data := getCatalogMarketsResponse(`{"data":[{"market":"bitmex-XBTF15-future","min_time":"2014-11-24T13:05:32.850000000Z","max_time":"2015-01-30T12:00:00.000000000Z","trades":{"min_time":"2014-11-24T13:05:32.850000000Z","max_time":"2015-01-30T12:00:00.000000000Z"},"exchange":"bitmex","type":"future","symbol":"XBTF15","base":"btc","quote":"usd","size_asset":"XBT","margin_asset":"USD","contract_size":"1","tick_size":"0.1","listing":"2014-11-24T13:05:32.850000000Z","expiration":"2015-01-30T12:00:00.000000000Z"}]}`)
 	param := api.GetCatalogMarketsParams{
 		Markets:  &api.CatalogMarketId{`bitmex-XBTF15-future`},
@@ -780,6 +781,7 @@ func TestGetCatalogMarketsWithResponse(t *testing.T) {
 		Base:     &base,
 		Asset:    &asset,
 		Symbol:   &symbol,
+		Quote:    &quote,
 		Include:  &api.CatalogMarketIncludeFields{`trades`, `orderbooks`, `quotes`, `candles`, `liquidations`},
 		Exclude:  &api.CatalogMarketExcludeFields{`funding_rates`, `openinterest`},
 		Format:   &format,
@@ -822,7 +824,7 @@ func TestFailAuthenticationForGetCatalogMarketsWithResponse(t *testing.T) {
 	assert.Equal(t, *actualResponse.JSON401, errResponse)
 }
 
-// Catalog Available markets
+// Catalog Available markets candles
 
 func TestMetricsNotFoundForGetCatalogMarketCandlesWithResponse(t *testing.T) {
 	errResponse := buildErrorMessage(`bad_request`, `Bad parameter 'markets'. Invalid format for market: 'asdw'.`)
@@ -874,6 +876,7 @@ func TestGetCatalogMarketCandlesWithResponse(t *testing.T) {
 	var symbol api.MarketSymbol = `XBTF15`
 	var limit api.CatalogMarketLimit = `1`
 	var format api.CatalogMarketFormat = `json`
+	var quote api.MarketQuoteParameter = `usd`
 	data := getCatalogMarketCandlesResponse(`{"data":[{"market":"binance-BTCUSDT-future","metrics":[{"metric":"liquidations_reported_future_buy_usd_5m","frequencies":[{"frequency":"5m","min_time":"2020-01-01T01:25:00.000000000Z","max_time":"2022-01-21T00:30:00.000000000Z"}]},{"metric":"liquidations_reported_future_buy_usd_1h","frequencies":[{"frequency":"1h","min_time":"2020-01-01T01:00:00.000000000Z","max_time":"2022-01-20T23:00:00.000000000Z"}]},{"metric":"liquidations_reported_future_buy_units_1d","frequencies":[{"frequency":"1d","min_time":"2020-01-01T00:00:00.000000000Z","max_time":"2022-01-20T00:00:00.000000000Z"}]}]},{"market":"bybit-BTCUSDT-future","metrics":[{"metric":"liquidations_reported_future_buy_usd_5m","frequencies":[{"frequency":"5m","min_time":"2021-04-30T12:35:00.000000000Z","max_time":"2022-01-21T00:25:00.000000000Z"}]},{"metric":"liquidations_reported_future_buy_usd_1h","frequencies":[{"frequency":"1h","min_time":"2021-04-30T12:00:00.000000000Z","max_time":"2022-01-20T23:00:00.000000000Z"}]},{"metric":"liquidations_reported_future_buy_units_1d","frequencies":[{"frequency":"1d","min_time":"2021-04-30T00:00:00.000000000Z","max_time":"2022-01-20T00:00:00.000000000Z"}]}]}]}`)
 	param := api.GetCatalogMarketCandlesParams{
 		Markets:  &api.CatalogMarketId{`bitmex-XBTF15-future`},
@@ -883,6 +886,7 @@ func TestGetCatalogMarketCandlesWithResponse(t *testing.T) {
 		Asset:    &asset,
 		Symbol:   &symbol,
 		Format:   &format,
+		Quote:    &quote,
 		Limit:    &limit,
 	}
 
@@ -916,6 +920,106 @@ func TestFailAuthenticationForGetCatalogMarketCandlesWithResponse(t *testing.T) 
 		},
 	)
 	actualResponse, err := _coinmetrics.GetCatalogMarketCandlesWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Nil(t, actualResponse.JSON200)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Equal(t, *actualResponse.JSON401, errResponse)
+}
+
+// Catalog Available market metrics
+
+func TestMetricsNotFoundForGetCatalogMarketMetricsWithResponse(t *testing.T) {
+	errResponse := buildErrorMessage(`bad_request`, `Bad parameter 'markets'. Invalid format for market: 'asdw'.`)
+	param := api.GetCatalogMarketMetricsParams{
+		Markets: &api.CatalogMarketId{`asdw`},
+	}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-metrics`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
+			if err != nil {
+				return httpmock.NewStringResponse(http.StatusInternalServerError, `Unable to return mock response`), nil
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogMarketMetricsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Nil(t, actualResponse.JSON200)
+	assert.Equal(t, *actualResponse.JSON400, errResponse)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestGetCatalogMarketMetricsWithoutParams(t *testing.T) {
+	data := getCatalogMarketMetricsResponse(`{"data":[{"market":"binance-BTCUSDT-future","metrics":[{"metric":"liquidations_reported_future_buy_usd_5m","frequencies":[{"frequency":"5m","min_time":"2020-01-01T01:25:00.000000000Z","max_time":"2022-01-21T00:30:00.000000000Z"}]},{"metric":"liquidations_reported_future_buy_usd_1h","frequencies":[{"frequency":"1h","min_time":"2020-01-01T01:00:00.000000000Z","max_time":"2022-01-20T23:00:00.000000000Z"}]},{"metric":"liquidations_reported_future_buy_units_1d","frequencies":[{"frequency":"1d","min_time":"2020-01-01T00:00:00.000000000Z","max_time":"2022-01-20T00:00:00.000000000Z"}]}]},{"market":"bybit-BTCUSDT-future","metrics":[{"metric":"liquidations_reported_future_buy_usd_5m","frequencies":[{"frequency":"5m","min_time":"2021-04-30T12:35:00.000000000Z","max_time":"2022-01-21T00:25:00.000000000Z"}]},{"metric":"liquidations_reported_future_buy_usd_1h","frequencies":[{"frequency":"1h","min_time":"2021-04-30T12:00:00.000000000Z","max_time":"2022-01-20T23:00:00.000000000Z"}]},{"metric":"liquidations_reported_future_buy_units_1d","frequencies":[{"frequency":"1d","min_time":"2021-04-30T00:00:00.000000000Z","max_time":"2022-01-20T00:00:00.000000000Z"}]}]}]}
+	`)
+	param := api.GetCatalogMarketMetricsParams{}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-metrics`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogMarketMetricsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Equal(t, *actualResponse.JSON200, *data)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestGetCatalogMarketMetricsWithResponse(t *testing.T) {
+	exchange := `binance`
+	var base api.MarketBase = `btc`
+	var asset api.MarketAsset = `btc`
+	var symbol api.MarketSymbol = `BTCUSDT`
+	var limit api.CatalogMarketLimit = `1`
+	var format api.CatalogMarketFormat = `json`
+	data := getCatalogMarketMetricsResponse(`{"data":[{"market":"binance-BTCUSDT-future","metrics":[{"metric":"liquidations_reported_future_buy_usd_5m","frequencies":[{"frequency":"5m","min_time":"2020-01-01T01:25:00.000000000Z","max_time":"2022-01-21T00:30:00.000000000Z"}]},{"metric":"liquidations_reported_future_buy_usd_1h","frequencies":[{"frequency":"1h","min_time":"2020-01-01T01:00:00.000000000Z","max_time":"2022-01-20T23:00:00.000000000Z"}]},{"metric":"liquidations_reported_future_buy_units_1d","frequencies":[{"frequency":"1d","min_time":"2020-01-01T00:00:00.000000000Z","max_time":"2022-01-20T00:00:00.000000000Z"}]}]}]}
+	`)
+	param := api.GetCatalogMarketMetricsParams{
+		Markets:  &api.CatalogMarketId{`binance-BTCUSDT-future`},
+		Exchange: &exchange,
+		Base:     &base,
+		Asset:    &asset,
+		Symbol:   &symbol,
+		Format:   &format,
+		Limit:    &limit,
+	}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-metrics`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogMarketMetricsWithResponse(context.Background(), &param)
+	assert.Nil(t, err)
+	assert.Equal(t, *actualResponse.JSON200, *data)
+	assert.Nil(t, actualResponse.JSON400)
+	assert.Nil(t, actualResponse.JSON401)
+}
+
+func TestFailAuthenticationForGetCatalogMarketMetricsWithResponse(t *testing.T) {
+	errResponse := buildErrorMessage(`unauthorized`, `Requested resource requires authorization.`)
+	param := api.GetCatalogMarketMetricsParams{}
+
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-metrics`, constants.TEST_ENDPOINT, constants.API_VERSION),
+		func(req *http.Request) (*http.Response, error) {
+			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
+			if err != nil {
+				return httpmock.NewStringResponse(http.StatusInternalServerError, `Unable to return mock response`), nil
+			}
+			return resp, nil
+		},
+	)
+	actualResponse, err := _coinmetrics.GetCatalogMarketMetricsWithResponse(context.Background(), &param)
 	assert.Nil(t, err)
 	assert.Nil(t, actualResponse.JSON200)
 	assert.Nil(t, actualResponse.JSON400)
@@ -1017,6 +1121,15 @@ func getCatalogMarketCandlesResponse(res string) *api.CatalogMarketCandlesRespon
 	err := json.Unmarshal([]byte(res), &responseStruct)
 	if err != nil {
 		return &api.CatalogMarketCandlesResponse{}
+	}
+	return &responseStruct
+}
+
+func getCatalogMarketMetricsResponse(res string) *api.CatalogMarketMetricsResponse {
+	responseStruct := api.CatalogMarketMetricsResponse{}
+	err := json.Unmarshal([]byte(res), &responseStruct)
+	if err != nil {
+		return &api.CatalogMarketMetricsResponse{}
 	}
 	return &responseStruct
 }

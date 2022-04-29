@@ -276,7 +276,7 @@ paths:
         - $ref: '#/components/parameters/Exchange'
         - $ref: '#/components/parameters/MarketType'
         - $ref: '#/components/parameters/MarketBase'
-        - $ref: '#/components/parameters/MarketQuote'
+        - $ref: '#/components/parameters/MarketQuoteParameter'
         - $ref: '#/components/parameters/MarketAsset'
         - $ref: '#/components/parameters/MarketSymbol'
         - $ref: '#/components/parameters/CatalogMarketIncludeFields'
@@ -313,7 +313,7 @@ paths:
         - $ref: '#/components/parameters/Exchange'
         - $ref: '#/components/parameters/MarketType'
         - $ref: '#/components/parameters/MarketBase'
-        - $ref: '#/components/parameters/MarketQuote'
+        - $ref: '#/components/parameters/MarketQuoteParameter'
         - $ref: '#/components/parameters/MarketAsset'
         - $ref: '#/components/parameters/MarketSymbol'
         - $ref: '#/components/parameters/CatalogMarketFormat'
@@ -348,7 +348,7 @@ paths:
         - $ref: '#/components/parameters/Exchange'
         - $ref: '#/components/parameters/MarketType'
         - $ref: '#/components/parameters/MarketBase'
-        - $ref: '#/components/parameters/MarketQuote'
+        - $ref: '#/components/parameters/MarketQuoteParameter'
         - $ref: '#/components/parameters/MarketAsset'
         - $ref: '#/components/parameters/MarketSymbol'
         - $ref: '#/components/parameters/CatalogMarketFormat'
@@ -359,6 +359,8 @@ paths:
           $ref: '#/components/responses/CatalogMarketMetrics'
         401:
           $ref: '#/components/responses/Unauthorized'
+        400:
+          $ref: '#/components/responses/MetricNotFound'
         414:
           $ref: '#/components/responses/UriTooLong'
       security:
@@ -599,7 +601,7 @@ paths:
         - $ref: '#/components/parameters/Exchange'
         - $ref: '#/components/parameters/MarketType'
         - $ref: '#/components/parameters/MarketBase'
-        - $ref: '#/components/parameters/MarketQuote'
+        - $ref: '#/components/parameters/MarketQuoteParameter'
         - $ref: '#/components/parameters/MarketAsset'
         - $ref: '#/components/parameters/MarketSymbol'
         - $ref: '#/components/parameters/CatalogMarketIncludeFields'
@@ -636,7 +638,7 @@ paths:
         - $ref: '#/components/parameters/Exchange'
         - $ref: '#/components/parameters/MarketType'
         - $ref: '#/components/parameters/MarketBase'
-        - $ref: '#/components/parameters/MarketQuote'
+        - $ref: '#/components/parameters/MarketQuoteParameter'
         - $ref: '#/components/parameters/MarketAsset'
         - $ref: '#/components/parameters/MarketSymbol'
         - $ref: '#/components/parameters/CatalogMarketFormat'
@@ -669,7 +671,7 @@ paths:
         - $ref: '#/components/parameters/Exchange'
         - $ref: '#/components/parameters/MarketType'
         - $ref: '#/components/parameters/MarketBase'
-        - $ref: '#/components/parameters/MarketQuote'
+        - $ref: '#/components/parameters/MarketQuoteParameter'
         - $ref: '#/components/parameters/MarketAsset'
         - $ref: '#/components/parameters/MarketSymbol'
         - $ref: '#/components/parameters/CatalogMarketFormat'
@@ -2370,7 +2372,7 @@ components:
       schema:
         type: string
 
-    MarketQuote:
+    MarketQuoteParameter:
       description: Quote asset of markets.
       in: query
       name: quote
