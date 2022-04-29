@@ -19,7 +19,7 @@ type CoinMetrics struct {
 	*api.ClientWithResponses
 }
 
-// InitClient will accept endpoint and apikey as parameter and it will return CoinMetrics struct which allows to access cliebt object.
+// InitClient will accept endpoint and apikey as parameter and it will return CoinMetrics struct which allows to access client object.
 func InitClient(endpoint, apiKey string) (CoinMetrics, error) {
 	var client *api.ClientWithResponses
 	var err error
@@ -32,15 +32,11 @@ func InitClient(endpoint, apiKey string) (CoinMetrics, error) {
 }
 
 /*
-	GetTimeseriesMarketImpliedVolatilityWithResponseAsync To get all records over channel for market volatility response
+	GetTimeseriesMarketImpliedVolatilityWithResponseSync To get all records for market volatility response
  	ApiEndpoint: https://docs.coinmetrics.io/api/v4#operation/getTimeseriesMarketImpliedVolatility
-	Returning:
-		- Method will be returning two channel, one having data and one with error.
-  		- This method will continuously retrive data and send over channel
-  		- Check error channel if is there any, when error will occured channel will be closed.
-		- You can call Limit() before calling this function to set limit.
+	Returning: []api.MarketImpliedVolatility, error
 */
-func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseAsync(ctx context.Context, params *api.GetTimeseriesMarketImpliedVolatilityParams, reqEditors ...api.RequestEditorFn) ([]api.MarketImpliedVolatility, error) {
+func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseSync(ctx context.Context, params *api.GetTimeseriesMarketImpliedVolatilityParams, reqEditors ...api.RequestEditorFn) ([]api.MarketImpliedVolatility, error) {
 	var response []api.MarketImpliedVolatility
 	var responseError error
 	marketImpliedVolatility := make(chan api.MarketImpliedVolatility)
@@ -94,14 +90,11 @@ func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseAsync(ctx c
 }
 
 /*
-	GetTimeseriesInstitutionMetricsWithResponseAsync To get all records over channel for institution metrics
+	GetTimeseriesInstitutionMetricsWithResponseSync To get all records for institution metrics
  	ApiEndpoint: https://docs.coinmetrics.io/api/v4#operation/getTimeseriesInstitutionMetrics
-	Returning:
-		- Method will be returning two channel, one having data and one with error.
-  		- This method will continuously retrive data and send over channel
-  		- Check error channel if is there any, when error will occured channel will be closed.
+	Returning: []interface{}, error
 */
-func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseAsync(ctx context.Context, params *api.GetTimeseriesInstitutionMetricsParams, reqEditors ...api.RequestEditorFn) ([]interface{}, error) {
+func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseSync(ctx context.Context, params *api.GetTimeseriesInstitutionMetricsParams, reqEditors ...api.RequestEditorFn) ([]interface{}, error) {
 	var response []interface{}
 	var responseError error
 	institutionMetricsResponse := make(chan interface{})
@@ -157,15 +150,11 @@ func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseAsync(ctx contex
 }
 
 /*
-	GetTimeseriesMarketOpenInteresetWithResponseAsync To get all records over channel for market open interest
+	GetTimeseriesMarketOpenInteresetWithResponseSync To get all records for market open interest
  	ApiEndpoint: https://docs.coinmetrics.io/api/v4#operation/getTimeseriesMarketOpenIntereset
-	Returning:
-		- Method will be returning two channel, one having data and one with error.
-  		- This method will continuously retrive data and send over channel
-  		- Check error channel if is there any, when error will occured channel will be closed.
-		- You can call Limit() before calling this function to set limit.
+	Returning: []api.MarketOpenInterest, error
 */
-func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseAsync(ctx context.Context, params *api.GetTimeseriesMarketOpenInteresetParams, reqEditors ...api.RequestEditorFn) ([]api.MarketOpenInterest, error) {
+func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseSync(ctx context.Context, params *api.GetTimeseriesMarketOpenInteresetParams, reqEditors ...api.RequestEditorFn) ([]api.MarketOpenInterest, error) {
 	var response []api.MarketOpenInterest
 	var responseError error
 	marketOpenInterest := make(chan api.MarketOpenInterest)
@@ -219,15 +208,11 @@ func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseAsync(ctx conte
 }
 
 /*
-	GetTimeseriesMarketGreeksWithResponseAsync To get market greeks
+	GetTimeseriesMarketGreeksWithResponseSync To get market greeks
  	ApiEndpoint: https://docs.coinmetrics.io/api/v4#operation/getTimeseriesMarketGreeks
-	Returning:
-		- Method will be returning two channel, one having data and one with error.
-  		- This method will continuously retrive data and send over channel
-  		- Check error channel if is there any, when error will occured channel will be closed.
-		- You can call Limit() before calling this function to set limit.
+	Returning: []api.MarketGreeks, error
 */
-func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseAsync(ctx context.Context, params *api.GetTimeseriesMarketGreeksParams, reqEditors ...api.RequestEditorFn) ([]api.MarketGreeks, error) {
+func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseSync(ctx context.Context, params *api.GetTimeseriesMarketGreeksParams, reqEditors ...api.RequestEditorFn) ([]api.MarketGreeks, error) {
 	var response []api.MarketGreeks
 	var responseError error
 	marketGreeks := make(chan api.MarketGreeks)
@@ -281,15 +266,11 @@ func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseAsync(ctx context.Cont
 }
 
 /*
-	GetMempoolFeeratesWithResponseAsync To get market greeks
+	GetMempoolFeeratesWithResponseSync To get mempool feerates
  	ApiEndpoint: https://docs.coinmetrics.io/api/v4#operation/getMempoolFeerates
-	Returning:
-		- Method will be returning two channel, one having data and one with error.
-  		- This method will continuously retrive data and send over channel
-  		- Check error channel if is there any, when error will occured channel will be closed.
-		- You can call Limit() before calling this function to set limit.
+	Returning: []api.MempoolFeerate, error
 */
-func (c CoinMetrics) GetMempoolFeeratesWithResponseAsync(ctx context.Context, params *api.GetMempoolFeeratesParams, reqEditors ...api.RequestEditorFn) ([]api.MempoolFeerate, error) {
+func (c CoinMetrics) GetMempoolFeeratesWithResponseSync(ctx context.Context, params *api.GetMempoolFeeratesParams, reqEditors ...api.RequestEditorFn) ([]api.MempoolFeerate, error) {
 	var response []api.MempoolFeerate
 	var responseError error
 	marketGreeks := make(chan api.MempoolFeerate)
@@ -342,6 +323,7 @@ func (c CoinMetrics) GetMempoolFeeratesWithResponseAsync(ctx context.Context, pa
 	}
 }
 
+// Limit you can set global limit for Sync method to get particular number of records
 func (c *CoinMetrics) Limit(l int32) {
 	limit = l
 }
