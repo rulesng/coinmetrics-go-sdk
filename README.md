@@ -64,3 +64,25 @@ func main() {
 - As you seen in usage how you can access method of api, on that api we have written some of the methods which will help to eliminate usecase of handling pagination.
 
 - Custom method are ending with `WithResponseSync` will return slice and error in return.
+
+### Response
+- When you call any of the method you will get two object in return of that function, here specific we are mentioning method ending with `WithResponse` or `WithResponseSync`
+
+- Object will have `struct` and `error`, where `error` represents any `error` occured before calling api.
+
+- While error related to api like `400`,`401`,`402`,`404` etc will be part of struct.
+
+- Response struct will contain following fields
+ ```
+    Body []byte
+    JSON200 *ParticularStructForResponse
+    JSON400 *api.ErrorResponse
+    JSON401 *api.ErrorResponse
+    JSON403 *api.ErrorResponse
+    .
+    .
+ ```
+
+ - You need to check if `JSON200` will be empty then error might be contain by other struct
+
+ - Those struct contain error object with type and message.
