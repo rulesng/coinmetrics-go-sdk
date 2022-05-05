@@ -34,10 +34,10 @@ func InitClient(endpoint, apiKey string) (CoinMetrics, error) {
 /*
 	GetTimeseriesMarketImpliedVolatilityWithResponseSync To get all records for market volatility response
  	ApiEndpoint: https://docs.coinmetrics.io/api/v4#operation/getTimeseriesMarketImpliedVolatility
-	Returning: []api.MarketImpliedVolatility, error
+	Returning: api.GetTimeseriesMarketImpliedVolatilityResponse, error
 */
-func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseSync(ctx context.Context, params *api.GetTimeseriesMarketImpliedVolatilityParams, reqEditors ...api.RequestEditorFn) ([]api.MarketImpliedVolatility, error) {
-	var response []api.MarketImpliedVolatility
+func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseSync(ctx context.Context, params *api.GetTimeseriesMarketImpliedVolatilityParams, reqEditors ...api.RequestEditorFn) (api.GetTimeseriesMarketImpliedVolatilityResponse, error) {
+	var response api.GetTimeseriesMarketImpliedVolatilityResponse
 	var responseError error
 	marketImpliedVolatility := make(chan api.MarketImpliedVolatility)
 	marketImpliedVolatilityError := make(chan error)
@@ -73,16 +73,26 @@ func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseSync(ctx co
 					break
 				}
 			} else {
-				marketImpliedVolatilityError <- errors.New(constants.NO_DATA_FOUND)
+				// Adding other errors to response maintain orignal implemenation of api
+				if res.JSON400 != nil {
+					response.JSON400 = res.JSON400
+				} else if res.JSON401 != nil {
+					response.JSON401 = res.JSON401
+				} else if res.JSON403 != nil {
+					response.JSON403 = res.JSON403
+				}
+				marketImpliedVolatilityError <- err
 				break
 			}
 		}
 	}()
 
+	var i int64 = 0
 	for {
 		select {
 		case record := <-marketImpliedVolatility:
-			response = append(response, record)
+			response.JSON200.Data[i] = record
+			i++
 		case responseError = <-marketImpliedVolatilityError:
 			return response, responseError
 		}
@@ -152,10 +162,10 @@ func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseSync(ctx context
 /*
 	GetTimeseriesMarketOpenInteresetWithResponseSync To get all records for market open interest
  	ApiEndpoint: https://docs.coinmetrics.io/api/v4#operation/getTimeseriesMarketOpenIntereset
-	Returning: []api.MarketOpenInterest, error
+	Returning: api.GetTimeseriesMarketOpenInteresetResponse, error
 */
-func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseSync(ctx context.Context, params *api.GetTimeseriesMarketOpenInteresetParams, reqEditors ...api.RequestEditorFn) ([]api.MarketOpenInterest, error) {
-	var response []api.MarketOpenInterest
+func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseSync(ctx context.Context, params *api.GetTimeseriesMarketOpenInteresetParams, reqEditors ...api.RequestEditorFn) (api.GetTimeseriesMarketOpenInteresetResponse, error) {
+	var response api.GetTimeseriesMarketOpenInteresetResponse
 	var responseError error
 	marketOpenInterest := make(chan api.MarketOpenInterest)
 	marketOpenInterestError := make(chan error)
@@ -191,16 +201,25 @@ func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseSync(ctx contex
 					break
 				}
 			} else {
-				marketOpenInterestError <- errors.New(constants.NO_DATA_FOUND)
+				if res.JSON400 != nil {
+					response.JSON400 = res.JSON400
+				} else if res.JSON401 != nil {
+					response.JSON401 = res.JSON401
+				} else if res.JSON403 != nil {
+					response.JSON403 = res.JSON403
+				}
+				marketOpenInterestError <- err
 				break
 			}
 		}
 	}()
 
+	var i int64 = 0
 	for {
 		select {
 		case record := <-marketOpenInterest:
-			response = append(response, record)
+			response.JSON200.Data[i] = record
+			i++
 		case responseError = <-marketOpenInterestError:
 			return response, responseError
 		}
@@ -210,10 +229,10 @@ func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseSync(ctx contex
 /*
 	GetTimeseriesMarketGreeksWithResponseSync To get market greeks
  	ApiEndpoint: https://docs.coinmetrics.io/api/v4#operation/getTimeseriesMarketGreeks
-	Returning: []api.MarketGreeks, error
+	Returning: api.GetTimeseriesMarketGreeksResponse, error
 */
-func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseSync(ctx context.Context, params *api.GetTimeseriesMarketGreeksParams, reqEditors ...api.RequestEditorFn) ([]api.MarketGreeks, error) {
-	var response []api.MarketGreeks
+func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseSync(ctx context.Context, params *api.GetTimeseriesMarketGreeksParams, reqEditors ...api.RequestEditorFn) (api.GetTimeseriesMarketGreeksResponse, error) {
+	var response api.GetTimeseriesMarketGreeksResponse
 	var responseError error
 	marketGreeks := make(chan api.MarketGreeks)
 	marketGreeksError := make(chan error)
@@ -249,16 +268,25 @@ func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseSync(ctx context.Conte
 					break
 				}
 			} else {
-				marketGreeksError <- errors.New(constants.NO_DATA_FOUND)
+				if res.JSON400 != nil {
+					response.JSON400 = res.JSON400
+				} else if res.JSON401 != nil {
+					response.JSON401 = res.JSON401
+				} else if res.JSON403 != nil {
+					response.JSON403 = res.JSON403
+				}
+				marketGreeksError <- err
 				break
 			}
 		}
 	}()
 
+	var i int64 = 0
 	for {
 		select {
 		case record := <-marketGreeks:
-			response = append(response, record)
+			response.JSON200.Data[i] = record
+			i++
 		case responseError = <-marketGreeksError:
 			return response, responseError
 		}
@@ -268,10 +296,10 @@ func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseSync(ctx context.Conte
 /*
 	GetMempoolFeeratesWithResponseSync To get mempool feerates
  	ApiEndpoint: https://docs.coinmetrics.io/api/v4#operation/getMempoolFeerates
-	Returning: []api.MempoolFeerate, error
+	Returning: api.GetMempoolFeeratesResponse, error
 */
-func (c CoinMetrics) GetMempoolFeeratesWithResponseSync(ctx context.Context, params *api.GetMempoolFeeratesParams, reqEditors ...api.RequestEditorFn) ([]api.MempoolFeerate, error) {
-	var response []api.MempoolFeerate
+func (c CoinMetrics) GetMempoolFeeratesWithResponseSync(ctx context.Context, params *api.GetMempoolFeeratesParams, reqEditors ...api.RequestEditorFn) (api.GetMempoolFeeratesResponse, error) {
+	var response api.GetMempoolFeeratesResponse
 	var responseError error
 	marketGreeks := make(chan api.MempoolFeerate)
 	marketGreeksError := make(chan error)
@@ -304,19 +332,28 @@ func (c CoinMetrics) GetMempoolFeeratesWithResponseSync(ctx context.Context, par
 				if pageSize == 0 {
 					break
 				}
-				continue
+			} else {
+				if res.JSON400 != nil {
+					response.JSON400 = res.JSON400
+				} else if res.JSON401 != nil {
+					response.JSON401 = res.JSON401
+				} else if res.JSON403 != nil {
+					response.JSON403 = res.JSON403
+				}
+				marketGreeksError <- err
+				break
 			}
-			marketGreeksError <- errors.New(constants.NO_DATA_FOUND)
-			break
 		}
 		close(marketGreeks)
 		close(marketGreeksError)
 	}()
 
+	var i int64 = 0
 	for {
 		select {
 		case record := <-marketGreeks:
-			response = append(response, record)
+			response.JSON200.Data[i] = record
+			i++
 		case responseError = <-marketGreeksError:
 			return response, responseError
 		}
