@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	api "github.com/Improwised/coinmetrics-go-sdk/api/v4"
-	"github.com/Improwised/coinmetrics-go-sdk/constants"
+	api "github.com/rulesng/coinmetrics-go-sdk/api/v4"
+	"github.com/rulesng/coinmetrics-go-sdk/constants"
 	"go.uber.org/ratelimit"
 )
 

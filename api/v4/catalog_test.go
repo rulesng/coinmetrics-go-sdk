@@ -8,10 +8,10 @@ import (
 	"os"
 	"testing"
 
-	api "github.com/Improwised/coinmetrics-go-sdk/api/v4"
-	"github.com/Improwised/coinmetrics-go-sdk/coinmetrics"
-	"github.com/Improwised/coinmetrics-go-sdk/constants"
 	"github.com/jarcoal/httpmock"
+	api "github.com/rulesng/coinmetrics-go-sdk/api/v4"
+	"github.com/rulesng/coinmetrics-go-sdk/coinmetrics"
+	"github.com/rulesng/coinmetrics-go-sdk/constants"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,7 +23,8 @@ func TestMain(m *testing.M) {
 	var _err error
 	_coinmetrics, _err = coinmetrics.InitClient(constants.TEST_ENDPOINT, constants.TEST_KEY)
 	if _err != nil {
-		panic(_err)
+		fmt.Println(_err)
+		//panic(_err)
 	}
 	os.Exit(m.Run())
 }

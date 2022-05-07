@@ -15,7 +15,7 @@ go get github.com/rulesng/coinmetrics-go-sdk
 - After installing sdk, it requires credentials to be passed which can be further used to access api of coinmetrics.
 
 ```go
-import "github.com/Improwised/coinmetrics-go-sdk"
+import "github.com/rulesng/coinmetrics-go-sdk"
 
 func main() {
     client, err := coinmetrics.Init(`api-endpoint.com`, `api-key`)
@@ -39,8 +39,8 @@ func main() {
     Example : 
     ```go
     import (
-        api "github.com/Improwised/coinmetrics-go-sdk/api/v4"
-        "github.com/Improwised/coinmetrics-go-sdk"
+        api "github.com/rulesng/coinmetrics-go-sdk/api/v4"
+        "github.com/rulesng/coinmetrics-go-sdk"
     )
     func main() {
         client, err := coinmetrics.Init(`api-endpoint.com`, `api-key`)
