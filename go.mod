@@ -1,4 +1,4 @@
-module github.com/Improwised/coinmetrics-go-sdk
+module github.com/rulesng/coinmetrics-go-sdk
 
 go 1.17
 

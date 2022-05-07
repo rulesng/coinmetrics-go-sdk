@@ -5,7 +5,7 @@
 - To use this sdk you need to have [golang](https://go.dev/doc/install) installed on your system.
 
 ```bash
-go install github.com/Improwised/coinmetrics-go-sdk
+go get github.com/rulesng/coinmetrics-go-sdk
 ```
 
 - sync vendor files by running `go mod vendor`
