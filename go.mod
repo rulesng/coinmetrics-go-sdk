@@ -16,4 +16,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
-replace github.com/Improwised/coinmetrics-go-sdk v0.1.0 => github.com/rulesng/coinmetrics-go-sdk v0.1.0
+replace (
+	github.com/Improwised/coinmetrics-go-sdk v0.0.0 => github.com/rulesng/coinmetrics-go-sdk v0.0.0
+	github.com/Improwised/coinmetrics-go-sdk v0.1.0 => github.com/rulesng/coinmetrics-go-sdk v0.1.0
+)
