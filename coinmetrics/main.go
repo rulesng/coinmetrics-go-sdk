@@ -482,3 +482,27 @@ func (c CoinMetrics) GetCatalogAllAssetPairsWithResponseSync(ctx context.Context
 	}
 	return response, err
 }
+
+/*
+	GetCatalogAllAssetsWithResponse To get all asset pairs
+ 	ApiEndpoint: https://docs.coinmetrics.io/api/v4#tag/Full-catalog
+	Returning: api.GetCatalogAllAssetsResponse, error
+*/
+func (c CoinMetrics) GetCatalogAllAssetsWithResponseSync(ctx context.Context, params *api.GetCatalogAllAssetsParams, reqEditors ...api.RequestEditorFn) (api.GetCatalogAllAssetsResponse, error) {
+	var response api.GetCatalogAllAssetsResponse
+
+	res, err := c.GetCatalogAllAssetsWithResponse(ctx, params, reqEditors...)
+	if err != nil {
+		return response, err
+	}
+	if res.JSON200 != nil {
+		response.JSON200 = res.JSON200
+	}
+	if res.JSON400 != nil {
+		response.JSON400 = res.JSON400
+	}
+	if res.JSON401 != nil {
+		response.JSON401 = res.JSON401
+	}
+	return response, err
+}
