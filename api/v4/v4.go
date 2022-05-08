@@ -56,16 +56,16 @@ const (
 
 // Defines values for InstitutionSort.
 const (
-	// Institution InstitutionSort = "institution"
+// Institution InstitutionSort = "institution"
 
-	// Time InstitutionSort = "time"
+// Time InstitutionSort = "time"
 )
 
 // Defines values for MarketMetricsSort.
 const (
-	// Market MarketMetricsSort = "market"
+// Market MarketMetricsSort = "market"
 
-	// Time MarketMetricsSort = "time"
+// Time MarketMetricsSort = "time"
 )
 
 // Defines values for PagingFrom.
@@ -77,9 +77,9 @@ const (
 
 // Defines values for PairSort.
 const (
-	// Pair PairSort = "pair"
+// Pair PairSort = "pair"
 
-	// Time PairSort = "time"
+// Time PairSort = "time"
 )
 
 // Defines values for Sort.
@@ -2020,7 +2020,7 @@ type MaxTime string
 // MempoolFeerate defines model for MempoolFeerate.
 type MempoolFeerate struct {
 	// Name of the asset.
-	Asset    string               `json:"asset"`
+	Asset    string              `json:"asset"`
 	Feerates MempoolFeerateBands `json:"feerates"`
 
 	// The time in ISO 8601 date-time format. Always with nanoseconds precision.
@@ -21194,7 +21194,9 @@ func ParseGetTimeseriesMarketCandlesResponse(rsp *http.Response) (*GetTimeseries
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
+		fmt.Printf("Dest is %+v\n", dest)
 		response.JSON200 = &dest
+		fmt.Printf("Response is %+v\n", response.JSON200)
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
 		var dest ErrorResponse

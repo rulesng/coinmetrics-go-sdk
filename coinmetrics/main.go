@@ -24,7 +24,7 @@ func InitClient(endpoint, apiKey string) (CoinMetrics, error) {
 	var client *api.ClientWithResponses
 	var err error
 	clientOptions := addClientOptions(apiKey)
-	client, err = api.NewClientWithResponses(fmt.Sprintf(`%s%s/`, endpoint, constants.API_VERSION), clientOptions)
+	client, err = api.NewClientWithResponses(fmt.Sprintf(`%s%s/`, endpoint, constants.ApiVersion), clientOptions)
 	if err != nil {
 		return CoinMetrics{}, err
 	}
@@ -49,12 +49,12 @@ func (c CoinMetrics) GetTimeseriesMarketImpliedVolatilityWithResponseSync(ctx co
 		for {
 			// This condition will trigger when limit is set
 			if pageSize != -1 {
-				if constants.DEFAULT_PAGE_SIZE > pageSize {
+				if constants.DefaultPageSize > pageSize {
 					cc := api.PageSize(pageSize)
 					pageSize = 0
 					params.PageSize = &cc
 				} else {
-					defaultSize := api.PageSize(constants.DEFAULT_PAGE_SIZE)
+					defaultSize := api.PageSize(constants.DefaultPageSize)
 					params.PageSize = &defaultSize
 					pageSize = pageSize - int32(defaultSize)
 				}
@@ -117,12 +117,12 @@ func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseSync(ctx context
 		for {
 			// This condition will trigger when limit is set
 			if limit != -1 {
-				if constants.DEFAULT_PAGE_SIZE > pageSize {
+				if constants.DefaultPageSize > pageSize {
 					cc := api.PageSize(pageSize)
 					pageSize = 0
 					params.PageSize = &cc
 				} else {
-					defaultSize := api.PageSize(constants.DEFAULT_PAGE_SIZE)
+					defaultSize := api.PageSize(constants.DefaultPageSize)
 					params.PageSize = &defaultSize
 					pageSize = pageSize - int32(defaultSize)
 				}
@@ -143,7 +143,7 @@ func (c CoinMetrics) GetTimeseriesInstitutionMetricsWithResponseSync(ctx context
 					break
 				}
 			} else {
-				institutionMetricsError <- errors.New(constants.NO_DATA_FOUND)
+				institutionMetricsError <- errors.New(constants.NoDataFound)
 				break
 			}
 		}
@@ -177,12 +177,12 @@ func (c CoinMetrics) GetTimeseriesMarketOpenInteresetWithResponseSync(ctx contex
 		for {
 			// This condition will trigger when limit is set
 			if pageSize != -1 {
-				if constants.DEFAULT_PAGE_SIZE > pageSize {
+				if constants.DefaultPageSize > pageSize {
 					cc := api.PageSize(pageSize)
 					pageSize = 0
 					params.PageSize = &cc
 				} else {
-					defaultSize := api.PageSize(constants.DEFAULT_PAGE_SIZE)
+					defaultSize := api.PageSize(constants.DefaultPageSize)
 					params.PageSize = &defaultSize
 					pageSize = pageSize - int32(defaultSize)
 				}
@@ -244,12 +244,12 @@ func (c CoinMetrics) GetTimeseriesMarketGreeksWithResponseSync(ctx context.Conte
 		for {
 			// This condition will trigger when limit is set
 			if pageSize != -1 {
-				if constants.DEFAULT_PAGE_SIZE > pageSize {
+				if constants.DefaultPageSize > pageSize {
 					cc := api.PageSize(pageSize)
 					pageSize = 0
 					params.PageSize = &cc
 				} else {
-					defaultSize := api.PageSize(constants.DEFAULT_PAGE_SIZE)
+					defaultSize := api.PageSize(constants.DefaultPageSize)
 					params.PageSize = &defaultSize
 					pageSize = pageSize - int32(defaultSize)
 				}
@@ -309,12 +309,12 @@ func (c CoinMetrics) GetMempoolFeeratesWithResponseSync(ctx context.Context, par
 		for {
 			// This condition will trigger when limit is set
 			if pageSize != -1 {
-				if constants.DEFAULT_PAGE_SIZE > pageSize {
+				if constants.DefaultPageSize > pageSize {
 					cc := api.MempoolFeeratesPageSize(pageSize)
 					pageSize = 0
 					params.PageSize = &cc
 				} else {
-					defaultSize := api.MempoolFeeratesPageSize(constants.DEFAULT_PAGE_SIZE)
+					defaultSize := api.MempoolFeeratesPageSize(constants.DefaultPageSize)
 					params.PageSize = &defaultSize
 					pageSize = pageSize - int32(defaultSize)
 				}
@@ -378,10 +378,107 @@ func addClientOptions(apiKey string) api.ClientOption {
 	}
 	addApiKey := func(ctx context.Context, req *http.Request) error {
 		q := req.URL.Query()
-		q.Add(constants.PARAMS_API_KEY, apiKey)
+		q.Add(constants.ParamsApiKey, apiKey)
 		req.URL.RawQuery = q.Encode()
 		return nil
 	}
 	clientOptions = api.WithRequestEditorFn(addApiKey)
 	return clientOptions
+}
+
+/*
+	GetTimeseriesMarketCandlesSync To get time series market candles
+ 	ApiEndpoint: https://docs.coinmetrics.io/api/v4#operation/getTimeseriesMarketCandles
+	Returning: api.GetTimeseriesMarketCandlesResponse, error
+*/
+func (c CoinMetrics) GetTimeseriesMarketCandlesSync(ctx context.Context, params *api.GetTimeseriesMarketCandlesParams, reqEditors ...api.RequestEditorFn) (api.GetTimeseriesMarketCandlesResponse, error) {
+	var response api.GetTimeseriesMarketCandlesResponse
+	var responseError error
+	marketCandles := make(chan api.MarketCandle)
+	marketCandlesError := make(chan error)
+	var pageSize int32 = limit
+
+	go func() {
+		defer close(marketCandles)
+		defer close(marketCandlesError)
+		for {
+			// This condition will trigger when limit is set
+			if pageSize != -1 {
+				if constants.DefaultPageSize > pageSize {
+					cc := api.PageSize(pageSize)
+					pageSize = 0
+					params.PageSize = &cc
+				} else {
+					defaultSize := api.PageSize(constants.DefaultPageSize)
+					params.PageSize = &defaultSize
+					pageSize = pageSize - int32(defaultSize)
+				}
+			}
+			res, err := c.GetTimeseriesMarketCandlesWithResponse(ctx, params, reqEditors...)
+			if err != nil {
+				marketCandlesError <- err
+				break
+			}
+			if res.JSON200 != nil && len(res.JSON200.Data) > 0 {
+				params.NextPageToken = res.JSON200.NextPageToken
+				for _, data := range res.JSON200.Data {
+					marketCandles <- data
+				}
+				if pageSize == 0 {
+					break
+				}
+				if params.NextPageToken == nil {
+					break
+				}
+			} else {
+				if res.JSON400 != nil {
+					response.JSON400 = res.JSON400
+				} else if res.JSON401 != nil {
+					response.JSON401 = res.JSON401
+				} else if res.JSON403 != nil {
+					response.JSON403 = res.JSON403
+				}
+				marketCandlesError <- err
+				break
+			}
+		}
+	}()
+
+	response.JSON200 = &api.MarketCandlesResponse{}
+	response.JSON200.Data = []api.MarketCandle{}
+
+	var i int64 = 0
+	for {
+		select {
+		case record := <-marketCandles:
+			response.JSON200.Data = append(response.JSON200.Data, record)
+			i++
+		case responseError = <-marketCandlesError:
+			return response, responseError
+		}
+	}
+}
+
+/*
+	GetCatalogAllAssetPairsWithResponseSync To get all asset pairs
+ 	ApiEndpoint: https://docs.coinmetrics.io/api/v4#operation/getCatalogAllExchangeAssets
+	Returning: api.GetCatalogAllAssetPairsResponse, error
+*/
+func (c CoinMetrics) GetCatalogAllAssetPairsWithResponseSync(ctx context.Context, params *api.GetCatalogAllAssetPairsParams, reqEditors ...api.RequestEditorFn) (api.GetCatalogAllAssetPairsResponse, error) {
+	var response api.GetCatalogAllAssetPairsResponse
+
+	res, err := c.GetCatalogAllAssetPairsWithResponse(ctx, params, reqEditors...)
+	if err != nil {
+		return response, err
+	}
+	if res.JSON200 != nil {
+		response.JSON200 = res.JSON200
+	}
+	if res.JSON400 != nil {
+		response.JSON400 = res.JSON400
+	}
+	if res.JSON401 != nil {
+		response.JSON401 = res.JSON401
+	}
+	return response, err
 }

@@ -21,7 +21,7 @@ func TestMain(m *testing.M) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 	var _err error
-	_coinmetrics, _err = coinmetrics.InitClient(constants.TEST_ENDPOINT, constants.TEST_KEY)
+	_coinmetrics, _err = coinmetrics.InitClient(constants.TestEndpoint, constants.TestKey)
 	if _err != nil {
 		fmt.Println(_err)
 		//panic(_err)
@@ -35,7 +35,7 @@ func TestAssetNotFoundForGetCatalogAssetsWithResponse(t *testing.T) {
 		Assets: &api.CatalogAssetId{`sdvwbtc`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
 			if err != nil {
@@ -55,7 +55,7 @@ func TestGetCatalogAssetsWithoutParams(t *testing.T) {
 	data := getCatalogAssetResponse(`{"data":[{"asset":"100x","full_name":"100xCoin","exchanges":["gate.io"],"markets":["gate.io-100x-usdt-spot"]},{"asset":"10set","full_name":"Tenset","exchanges":["gate.io","lbank"],"markets":["gate.io-10set-usdt-spot","lbank-10set-usdt-spot"]},{"asset":"18c","full_name":"Block 18","exchanges":["huobi"],"markets":["huobi-18c-btc-spot","huobi-18c-eth-spot"]},{"asset":"1art","full_name":"ArtWallet","exchanges":["gate.io"],"markets":["gate.io-1art-usdt-spot"]},{"asset":"1box","full_name":"1BOX","exchanges":["zb.com"],"markets":["zb.com-1box-usdt-spot"]},{"asset":"1earth","full_name":"EarthFund","exchanges":["gate.io","kucoin"],"markets":["gate.io-1earth-usdt-spot","kucoin-1earth-usdt-spot"]}]}`)
 	param := api.GetCatalogAssetsParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -79,7 +79,7 @@ func TestGetCatalogAssetsWithParams(t *testing.T) {
 		Exclude: &api.CatalogAssetExcludeFields{`metrics`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -101,7 +101,7 @@ func TestFailAuthenticationForGetCatalogAssetsWithResponse(t *testing.T) {
 		Assets: &api.CatalogAssetId{`sdvwbtc`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/assets`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
 			if err != nil {
@@ -123,7 +123,7 @@ func TestAssetNotFoundForGetCatalogMetricsWithResponse(t *testing.T) {
 		Metrics: &api.CatalogMetric{`asdgwav`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/metrics`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/metrics`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
 			if err != nil {
@@ -143,7 +143,7 @@ func TestGetCatalogMetricsWithoutParamsResponse(t *testing.T) {
 	data := getCatalogMetricsResponse(`{"data":[{"metric":"AdrActCnt","full_name":"Addresses, active, count","description":"The sum count of unique addresses that were active in the network (either as a recipient or originator of a ledger change) that interval. All parties in a ledger change action (recipients and originators) are counted. Individual addresses are not double-counted if previously active.","category":"Addresses","subcategory":"Active","unit":"Addresses","data_type":"bigint","type":"Sum","frequencies":[{}],"display_name":"Active Addr Cnt"}]}`)
 	param := api.GetCatalogMetricsParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/metrics`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/metrics`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -165,7 +165,7 @@ func TestGetCatalogMetricsWithParamsResponse(t *testing.T) {
 		Metrics: &api.CatalogMetric{`AdrActCnt`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/metrics`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/metrics`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -187,7 +187,7 @@ func TestFailAuthenticationForGetCatalogMetricsWithResponse(t *testing.T) {
 		Metrics: &api.CatalogMetric{`sdvwbtc`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/metrics`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/metrics`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
 			if err != nil {
@@ -211,7 +211,7 @@ func TestExchangeNotFoundForGetCatalogExchangesWithResponse(t *testing.T) {
 		Exchanges: &api.CatalogExchangeId{`sdvwbtc`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchanges`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchanges`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
 			if err != nil {
@@ -232,7 +232,7 @@ func TestGetCatalogExchangesWithoutParams(t *testing.T) {
 	`)
 	param := api.GetCatalogExchangesParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchanges`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchanges`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -254,7 +254,7 @@ func TestGetCatalogExchangesWithParams(t *testing.T) {
 		Exchanges: &api.CatalogExchangeId{`bitbank`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchanges`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchanges`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -274,7 +274,7 @@ func TestFailAuthenticationForGetCatalogExchangesWithResponse(t *testing.T) {
 	errResponse := buildErrorMessage(`unauthorized`, `Requested resource requires authorization.`)
 	param := api.GetCatalogExchangesParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchanges`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchanges`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
 			if err != nil {
@@ -298,7 +298,7 @@ func TestExchangeAssetsNotFoundForGetCatalogExchangeAssetsWithResponse(t *testin
 		ExchangeAssets: &api.CatalogExchangeAssetId{`sdvwbtc`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchange-assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchange-assets`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
 			if err != nil {
@@ -318,7 +318,7 @@ func TestGetCatalogExchangeAssetsWithoutParams(t *testing.T) {
 	data := getCatalogExchangeAssetsResponse(`{"data":[{"exchange_asset":"binance-btc","metrics":[{"metric":"volume_trusted_spot_usd_1d","frequencies":[{"frequency":"1d","min_time":"2020-10-16T00:00:00.000000000Z","max_time":"2021-01-05T00:00:00.000000000Z"}]},{"metric":"volume_trusted_spot_usd_1h","frequencies":[{"frequency":"1h","min_time":"2020-10-15T03:00:00.000000000Z","max_time":"2021-01-06T12:00:00.000000000Z"}]}]},{"exchange_asset":"coinbase-eth","metrics":[{"metric":"volume_trusted_spot_usd_1d","frequencies":[{"frequency":"1d","min_time":"2020-10-11T00:00:00.000000000Z","max_time":"2021-01-05T00:00:00.000000000Z"}]},{"metric":"volume_trusted_spot_usd_1h","frequencies":[{"frequency":"1h","min_time":"2020-10-10T19:00:00.000000000Z","max_time":"2021-01-06T12:00:00.000000000Z"}]}]}]}`)
 	param := api.GetCatalogExchangeAssetsParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchange-assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchange-assets`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -340,7 +340,7 @@ func TestGetCatalogExchangeAssetsWithParams(t *testing.T) {
 		ExchangeAssets: &api.CatalogExchangeAssetId{`binance-btc`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchange-assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchange-assets`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -360,7 +360,7 @@ func TestFailAuthenticationForGetCatalogExchangeAssetsWithResponse(t *testing.T)
 	errResponse := buildErrorMessage(`unauthorized`, `Requested resource requires authorization.`)
 	param := api.GetCatalogExchangesParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchange-assets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/exchange-assets`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
 			if err != nil {
@@ -384,7 +384,7 @@ func TestPairsNotFoundForGetCatalogAssetPairsWithResponse(t *testing.T) {
 		Pairs: &api.CatalogPairId{`sdvwbtc`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/pairs`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/pairs`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
 			if err != nil {
@@ -404,7 +404,7 @@ func TestGetCatalogAssetPairsWithoutParams(t *testing.T) {
 	data := getCatalogAssetPairsResponse(`{"data":[{"pair": "1inch-btc", "metrics": [{ "metric": "volume_reported_spot_usd_1d", "frequencies": [{ "frequency": "1d", "min_time": "2020-12-30T00:00:00.000000000Z", "max_time": "2022-04-25T00:00:00.000000000Z" }] }, { "metric": "volume_reported_spot_usd_1h", "frequencies": [{ "frequency": "1h", "min_time": "2020-12-30T00:00:00.000000000Z", "max_time": "2022-04-26T10:00:00.000000000Z" }] }, { "metric": "volume_trusted_spot_usd_1d", "frequencies": [{ "frequency": "1d", "min_time": "2020-12-30T00:00:00.000000000Z", "max_time": "2022-04-25T00:00:00.000000000Z" }] }, { "metric": "volume_trusted_spot_usd_1h", "frequencies": [{ "frequency": "1h", "min_time": "2020-12-30T00:00:00.000000000Z", "max_time": "2022-04-26T10:00:00.000000000Z" }] }] }, { "pair": "1inch-busd", "metrics": [{ "metric": "volume_reported_spot_usd_1h", "frequencies": [{ "frequency": "1h", "min_time": "2021-02-23T12:00:00.000000000Z", "max_time": "2022-04-26T10:00:00.000000000Z" }] }, { "metric": "volume_reported_spot_usd_1d", "frequencies": [{ "frequency": "1d", "min_time": "2021-02-24T00:00:00.000000000Z", "max_time": "2022-04-25T00:00:00.000000000Z" }] }, { "metric": "volume_trusted_spot_usd_1d", "frequencies": [{ "frequency": "1d", "min_time": "2021-02-24T00:00:00.000000000Z", "max_time": "2022-04-25T00:00:00.000000000Z" }] }, { "metric": "volume_trusted_spot_usd_1h", "frequencies": [{ "frequency": "1h", "min_time": "2021-02-23T12:00:00.000000000Z", "max_time": "2022-04-26T10:00:00.000000000Z"}]}]}]}`)
 	param := api.GetCatalogAssetPairsParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/pairs`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/pairs`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -426,7 +426,7 @@ func TestGetCatalogAssetPairsWithParams(t *testing.T) {
 		Pairs: &api.CatalogPairId{`1inch-btc`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/pairs`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/pairs`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -446,7 +446,7 @@ func TestFailAuthenticationForGetCatalogAssetPairsWithResponse(t *testing.T) {
 	errResponse := buildErrorMessage(`unauthorized`, `Requested resource requires authorization.`)
 	param := api.GetCatalogExchangesParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/pairs`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/pairs`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
 			if err != nil {
@@ -470,7 +470,7 @@ func TestInstitutionNotFoundForGetCatalogInstitutionsWithResponse(t *testing.T) 
 		Institutions: &api.CatalogInstitutionId{`sdvwbtc`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/institutions`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/institutions`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
 			if err != nil {
@@ -490,7 +490,7 @@ func TestGetCatalogInstitutionsWithoutParams(t *testing.T) {
 	data := getCatalogInstitutionsResponse(`{"data":[{"institution":"grayscale","metrics":[{"metric":"batfund_net_asset_value","frequencies":[{"frequency":"1d","min_time":"2021-03-17T00:00:00.000000000Z","max_time":"2022-02-11T00:00:00.000000000Z"}]},{"metric":"xlmfund_net_asset_value","frequencies":[{"frequency":"1d","min_time":"2018-12-06T00:00:00.000000000Z","max_time":"2021-10-19T00:00:00.000000000Z"}]}]}]}`)
 	param := api.GetCatalogInstitutionsParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/institutions`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/institutions`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -512,7 +512,7 @@ func TestGetCatalogInstitutionsWithParams(t *testing.T) {
 		Institutions: &api.CatalogInstitutionId{`grayscale`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/institutions`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/institutions`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -532,7 +532,7 @@ func TestFailAuthenticationForGetCatalogInstitutionsWithResponse(t *testing.T) {
 	errResponse := buildErrorMessage(`unauthorized`, `Requested resource requires authorization.`)
 	param := api.GetCatalogInstitutionsParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/institutions`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/institutions`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
 			if err != nil {
@@ -556,7 +556,7 @@ func TestIndexesNotFoundForGetCatalogIndexesWithResponse(t *testing.T) {
 		Indexes: &api.CatalogIndexId{`asdgwav`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/indexes`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/indexes`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
 			if err != nil {
@@ -576,7 +576,7 @@ func TestGetCatalogIndexesWithoutParams(t *testing.T) {
 	data := getCatalogIndexesResponse(`{"data":[{"index":"CMBI10","description":"'CMBI10' index.","frequencies":[{"frequency":"15s","min_time":"2020-06-08T20:12:40.000000000Z","max_time":"2020-06-08T20:29:30.000000000Z"}]},{"index":"CMBIBTC","description":"'CMBIBTC' index.","frequencies":[{"frequency":"15s","min_time":"2010-07-18T20:00:00.000000000Z","max_time":"2020-06-08T20:29:45.000000000Z"},{"frequency":"1d","min_time":"2010-07-19T00:00:00.000000000Z","max_time":"2020-06-08T00:00:00.000000000Z"},{"frequency":"1d-ny-close","min_time":"2010-07-18T20:00:00.000000000Z","max_time":"2020-06-08T20:00:00.000000000Z"},{"frequency":"1d-sg-close","min_time":"2010-07-19T08:00:00.000000000Z","max_time":"2020-06-08T08:00:00.000000000Z"},{"frequency":"1h","min_time":"2010-07-18T20:00:00.000000000Z","max_time":"2020-06-08T20:00:00.000000000Z"}]}]}`)
 	param := api.GetCatalogIndexesParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/indexes`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/indexes`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -598,7 +598,7 @@ func TestGetCatalogIndexesWithParams(t *testing.T) {
 		Indexes: &api.CatalogIndexId{`CMBI10`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/indexes`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/indexes`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -618,7 +618,7 @@ func TestFailAuthenticationForGetCatalogIndexesWithResponse(t *testing.T) {
 	errResponse := buildErrorMessage(`unauthorized`, `Requested resource requires authorization.`)
 	param := api.GetCatalogIndexesParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/indexes`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/indexes`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
 			if err != nil {
@@ -642,7 +642,7 @@ func TestAlertNotFoundForGetCatalogAssetAlertRulesWithResponse(t *testing.T) {
 		Assets: &api.CatalogAssetId{`sdvwbtc`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/alerts`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/alerts`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
 			if err != nil {
@@ -662,7 +662,7 @@ func TestGetCatalogAssetAlertWithoutParams(t *testing.T) {
 	data := getCatalogAssetAlertRulesResponse(`{"data":[{"asset":"btc","name":"block_count_empty_6b_hi","conditions":[{"description":"The last 4 blocks were empty.","threshold":"4","constituents":["block_count_empty_6b"]}]}]}`)
 	param := api.GetCatalogAssetAlertRulesParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/alerts`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/alerts`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -685,7 +685,7 @@ func TestGetCatalogAssetAlertWithParams(t *testing.T) {
 		Alerts: &api.CatalogAssetAlertId{`block_count_empty_6b`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/alerts`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/alerts`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -705,7 +705,7 @@ func TestFailAuthenticationForGetCatalogAssetAlertWithResponse(t *testing.T) {
 	errResponse := buildErrorMessage(`unauthorized`, `Requested resource requires authorization.`)
 	param := api.GetCatalogAssetAlertRulesParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/alerts`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/alerts`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
 			if err != nil {
@@ -729,7 +729,7 @@ func TestMetricsNotFoundForGetCatalogMarketsWithResponse(t *testing.T) {
 		Markets: &api.CatalogMarketId{`asdw`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/markets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/markets`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
 			if err != nil {
@@ -749,7 +749,7 @@ func TestGetCatalogMarketsWithoutParams(t *testing.T) {
 	data := getCatalogMarketsResponse(`{"data":[{"market":"bitmex-XBTF15-future","min_time":"2014-11-24T13:05:32.850000000Z","max_time":"2015-01-30T12:00:00.000000000Z","trades":{"min_time":"2014-11-24T13:05:32.850000000Z","max_time":"2015-01-30T12:00:00.000000000Z"},"exchange":"bitmex","type":"future","symbol":"XBTF15","base":"btc","quote":"usd","size_asset":"XBT","margin_asset":"USD","contract_size":"1","tick_size":"0.1","listing":"2014-11-24T13:05:32.850000000Z","expiration":"2015-01-30T12:00:00.000000000Z"},{"market":"bitfinex-agi-btc-spot","min_time":"2018-04-07T16:25:55.000000000Z","max_time":"2020-03-25T20:12:09.639000000Z","trades":{"min_time":"2018-04-07T16:25:55.000000000Z","max_time":"2020-03-25T20:12:09.639000000Z"},"exchange":"bitfinex","type":"spot","base":"agi","quote":"btc"}]}`)
 	param := api.GetCatalogMarketsParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/markets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/markets`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -789,7 +789,7 @@ func TestGetCatalogMarketsWithResponse(t *testing.T) {
 		Limit:    &limit,
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/markets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/markets`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -809,7 +809,7 @@ func TestFailAuthenticationForGetCatalogMarketsWithResponse(t *testing.T) {
 	errResponse := buildErrorMessage(`unauthorized`, `Requested resource requires authorization.`)
 	param := api.GetCatalogMarketsParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/markets`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/markets`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
 			if err != nil {
@@ -833,7 +833,7 @@ func TestMetricsNotFoundForGetCatalogMarketCandlesWithResponse(t *testing.T) {
 		Markets: &api.CatalogMarketId{`asdw`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-candles`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-candles`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
 			if err != nil {
@@ -853,7 +853,7 @@ func TestGetCatalogMarketCandlesWithoutParams(t *testing.T) {
 	data := getCatalogMarketCandlesResponse(`{"data":[{"market":"binance-BTCUSDT-future","metrics":[{"metric":"liquidations_reported_future_buy_usd_5m","frequencies":[{"frequency":"5m","min_time":"2020-01-01T01:25:00.000000000Z","max_time":"2022-01-21T00:30:00.000000000Z"}]},{"metric":"liquidations_reported_future_buy_usd_1h","frequencies":[{"frequency":"1h","min_time":"2020-01-01T01:00:00.000000000Z","max_time":"2022-01-20T23:00:00.000000000Z"}]},{"metric":"liquidations_reported_future_buy_units_1d","frequencies":[{"frequency":"1d","min_time":"2020-01-01T00:00:00.000000000Z","max_time":"2022-01-20T00:00:00.000000000Z"}]}]},{"market":"bybit-BTCUSDT-future","metrics":[{"metric":"liquidations_reported_future_buy_usd_5m","frequencies":[{"frequency":"5m","min_time":"2021-04-30T12:35:00.000000000Z","max_time":"2022-01-21T00:25:00.000000000Z"}]},{"metric":"liquidations_reported_future_buy_usd_1h","frequencies":[{"frequency":"1h","min_time":"2021-04-30T12:00:00.000000000Z","max_time":"2022-01-20T23:00:00.000000000Z"}]},{"metric":"liquidations_reported_future_buy_units_1d","frequencies":[{"frequency":"1d","min_time":"2021-04-30T00:00:00.000000000Z","max_time":"2022-01-20T00:00:00.000000000Z"}]}]}]}`)
 	param := api.GetCatalogMarketCandlesParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-candles`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-candles`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -891,7 +891,7 @@ func TestGetCatalogMarketCandlesWithResponse(t *testing.T) {
 		Limit:    &limit,
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-candles`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-candles`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -911,7 +911,7 @@ func TestFailAuthenticationForGetCatalogMarketCandlesWithResponse(t *testing.T) 
 	errResponse := buildErrorMessage(`unauthorized`, `Requested resource requires authorization.`)
 	param := api.GetCatalogMarketCandlesParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-candles`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-candles`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
 			if err != nil {
@@ -935,7 +935,7 @@ func TestMetricsNotFoundForGetCatalogMarketMetricsWithResponse(t *testing.T) {
 		Markets: &api.CatalogMarketId{`asdw`},
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-metrics`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-metrics`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusBadRequest, errResponse)
 			if err != nil {
@@ -956,7 +956,7 @@ func TestGetCatalogMarketMetricsWithoutParams(t *testing.T) {
 	`)
 	param := api.GetCatalogMarketMetricsParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-metrics`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-metrics`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -991,7 +991,7 @@ func TestGetCatalogMarketMetricsWithResponse(t *testing.T) {
 		Limit:    &limit,
 	}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-metrics`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-metrics`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusOK, data)
 			if err != nil {
@@ -1011,7 +1011,7 @@ func TestFailAuthenticationForGetCatalogMarketMetricsWithResponse(t *testing.T) 
 	errResponse := buildErrorMessage(`unauthorized`, `Requested resource requires authorization.`)
 	param := api.GetCatalogMarketMetricsParams{}
 
-	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-metrics`, constants.TEST_ENDPOINT, constants.API_VERSION),
+	httpmock.RegisterResponder(http.MethodGet, fmt.Sprintf(`%s%s/catalog/market-metrics`, constants.TestEndpoint, constants.ApiVersion),
 		func(req *http.Request) (*http.Response, error) {
 			resp, err := httpmock.NewJsonResponse(http.StatusUnauthorized, errResponse)
 			if err != nil {
