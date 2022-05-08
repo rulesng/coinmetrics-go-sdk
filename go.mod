@@ -18,5 +18,6 @@ require (
 
 replace (
 	github.com/Improwised/coinmetrics-go-sdk v0.0.0 => github.com/rulesng/coinmetrics-go-sdk v0.0.0
+	github.com/Improwised/coinmetrics-go-sdk v0.0.0-20220505080927-90b13f89bd92 => github.com/rulesng/coinmetrics-go-sdk v0.0.0-20220505080927-90b13f89bd92
 	github.com/Improwised/coinmetrics-go-sdk v0.1.0 => github.com/rulesng/coinmetrics-go-sdk v0.1.0
 )
