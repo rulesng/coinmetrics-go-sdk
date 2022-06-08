@@ -9284,6 +9284,8 @@ func NewGetCatalogAllAssetsRequest(server string, params *GetCatalogAllAssetsPar
 		return nil, err
 	}
 
+	fmt.Printf("queryURL: %s\n", queryURL)
+
 	queryValues := queryURL.Query()
 
 	if params.Assets != nil {
@@ -19893,6 +19895,14 @@ func ParseGetCatalogAllAssetsResponse(rsp *http.Response) (*GetCatalogAllAssetsR
 			return nil, err
 		}
 		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		// Not JSON 404 so we use JSON 400 for this
+		response.JSON400 = &dest
 
 	}
 
